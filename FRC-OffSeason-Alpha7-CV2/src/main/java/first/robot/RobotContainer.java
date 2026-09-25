@@ -5,6 +5,9 @@
 package first.robot;
 
 import first.robot.commands.DriveCommands;
+import first.robot.subsystems.CANRange.CANRangeIO;
+import first.robot.subsystems.CANRange.CANRangeIOReal;
+import first.robot.subsystems.CANRange.CANRangeTest;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
 import first.robot.subsystems.drive.GyroIO;
@@ -32,6 +35,7 @@ import org.wpilib.math.geometry.Rotation2d;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final CANRangeTest canRange;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -45,7 +49,7 @@ public class RobotContainer {
 
 
     switch (Constants.getMode()) {
-      case REAL ->
+      case REAL -> {
           // Real robot, instantiate hardware IO implementations
           drive =
               new Drive(
@@ -54,8 +58,10 @@ public class RobotContainer {
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[1]),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[2]),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[3]));
+          canRange = new CANRangeTest(new CANRangeIOReal());
+      }
 
-      case SIM ->
+      case SIM -> {
           // Sim robot, instantiate physics sim IO implementations. There is no Pigeon sim, so the
           // heading comes from the module kinematics instead.
           drive =
@@ -65,8 +71,10 @@ public class RobotContainer {
                   new ModuleIOSim(),
                   new ModuleIOSim(),
                   new ModuleIOSim());
+          canRange = new CANRangeTest(new CANRangeIO() {});
+      }
 
-      default ->
+      default -> {
           // Replayed robot, disable IO implementations
           drive =
               new Drive(
@@ -75,6 +83,8 @@ public class RobotContainer {
                   new ModuleIO() {},
                   new ModuleIO() {},
                   new ModuleIO() {});
+          canRange = new CANRangeTest(new CANRangeIO() {});
+      }
     }
 
     // Set up auto routines
