@@ -5,6 +5,7 @@
 package first.robot;
 
 import org.wpilib.framework.RobotBase;
+import org.wpilib.hardware.bus.CANPort;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
 
@@ -93,4 +94,16 @@ public final class Constants {
   }
 
   private Constants() {}
+
+  public static class ShooterConstants{
+    public static final CANPort kshooterMotorCANbus = CANPort.CAN_S0;
+
+    public static final int kshooterMotor1ID = 0;
+    public static final int kshooterMotor2ID = 0;
+    public static final int kshooterMotor3ID = 0;
+
+    public static final double kP = 0.1;
+    public static final double kI = 0;
+    public static final double kD = 0;
+  }
 }
