@@ -120,7 +120,7 @@ public class Drive extends SubsystemBase {
     System.out.println("Hello Run Velocity: " + speeds.toString());
     System.out.println("Current Position: " + getPose());
     // Calculate module setpoints
-    ChassisVelocities discreteSpeeds = speeds.discretize(Constants.loopPeriodSecs);
+    ChassisVelocities discreteSpeeds = speeds.discretize(Constants.kLOOPPERIODSECS);
     // desaturateWheelVelocities returns a new array rather than mutating in place, so its result
     // must be used or the speed limit is silently ignored.
     SwerveModuleVelocity[] setpointStates =

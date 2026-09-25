@@ -10,7 +10,7 @@ import org.wpilib.util.Alert.Level;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
- * on SystemCore. Change the value of {@link #simMode} to switch between "sim" (physics sim) and
+ * on SystemCore. Change the value of {@link #kSIMMODE} to switch between "sim" (physics sim) and
  * "replay" (log replay from a file).
  */
 public final class Constants {
@@ -18,36 +18,36 @@ public final class Constants {
    * Robot loop period. This is handed to {@code LoggedRobot} in {@link Robot}, so the value used
    * for velocity discretization and Phoenix status frame rates always matches the real loop rate.
    */
-  public static final double loopPeriodSecs = 0.02;
+  public static final double kLOOPPERIODSECS = 0.02;
 
   /** Which physical robot the code is running on. Selects hardware IDs. */
-  private static RobotType robotType = RobotType.DEVBOT;
+  private static RobotType kROBOTTYPE = RobotType.DEVBOT;
 
   /** Enables tuning dashboard inputs. Must be false when merging. */
-  public static final boolean tuningMode = false;
+  public static final boolean kTUNINGMODE = false;
 
   /** Mode used when not running on real hardware. Set to REPLAY to replay a log instead. */
-  public static final Mode simMode = Mode.SIM;
+  public static final Mode kSIMMODE = Mode.SIM;
 
   @SuppressWarnings("resource")
   public static RobotType getRobot() {
-    if (!disableHAL && RobotBase.isReal() && robotType == RobotType.SIMBOT) {
+    if (!disableHAL && RobotBase.isReal() && kROBOTTYPE == RobotType.SIMBOT) {
       new Alert(
               "invalidRobotType",
               "Invalid robot selected, using competition robot as default.",
               Level.MEDIUM)
           .set(true);
-      robotType = RobotType.DEVBOT;
+      kROBOTTYPE = RobotType.DEVBOT;
     }
-    return robotType;
+    return kROBOTTYPE;
   }
 
   /**
    * Returns the current runtime mode. Real hardware is always {@link Mode#REAL}; off-robot this
-   * follows {@link #simMode} so that the physics simulation actually runs by default.
+   * follows {@link #kSIMMODE} so that the physics simulation actually runs by default.
    */
   public static Mode getMode() {
-    return RobotBase.isReal() ? Mode.REAL : simMode;
+    return RobotBase.isReal() ? Mode.REAL : kSIMMODE;
   }
 
   public enum Mode {
@@ -75,8 +75,8 @@ public final class Constants {
   /** Checks whether the correct robot is selected when deploying. */
   public static class CheckDeploy {
     public static void main(String... args) {
-      if (robotType == RobotType.SIMBOT) {
-        System.err.println("Cannot deploy, invalid robot selected: " + robotType);
+      if (kROBOTTYPE == RobotType.SIMBOT) {
+        System.err.println("Cannot deploy, invalid robot selected: " + kROBOTTYPE);
         System.exit(1);
       }
     }
@@ -85,11 +85,19 @@ public final class Constants {
   /** Checks that the default robot is selected and tuning mode is disabled. */
   public static class CheckPullRequest {
     public static void main(String... args) {
-      if (robotType != RobotType.DEVBOT || tuningMode) {
+      if (kROBOTTYPE != RobotType.DEVBOT || kTUNINGMODE) {
         System.err.println("Do not merge, non-default constants are configured.");
         System.exit(1);
       }
     }
+  }
+
+  // ------- Subsystem constants ----- //
+  public static class ActiveFloorConstants {
+    public static final int kFLOOR_ROLLER_MOTOR_ID = 9;
+
+    public static final double kFLOOR_POWER_INWARD = 0.5;
+    public static final double kFLOOR_POWER_OUTWARD = -0.5;
   }
 
   private Constants() {}
