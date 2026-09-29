@@ -7,6 +7,8 @@ package first.robot;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
+import org.wpilib.hardware.bus.CANPort;
+import com.ctre.phoenix6.CANBus;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -90,6 +92,16 @@ public final class Constants {
         System.exit(1);
       }
     }
+  }
+
+  public static class IntakeConstants {
+
+    public static final CANPort kIntakeMotorCANPort = CANPort.CAN_S0;
+    public static final CANBus kIntakeMotorCANBus = new CANBus(kIntakeMotorCANPort);
+
+    public static final int kIntakePivotID = 0;
+    public static final int kIntakeRoller1ID = 0;
+    public static final int kIntakeRoller2ID = 0;
   }
 
   private Constants() {}
