@@ -49,7 +49,7 @@ public class RobotContainer {
           // Real robot, instantiate hardware IO implementations
           drive =
               new Drive(
-                  new GyroIOOnboardIMU(),
+                  new GyroIOPigeon2(),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[0]),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[1]),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[2]),
@@ -102,14 +102,6 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
-    
-    // System.out.println("Hello New Drive");
-    // drive.setDefaultCommand(
-    //     DriveCommands.joystickDrive(
-    //         drive,
-    //         () -> 1,
-    //         () -> 0,
-    //         () -> 0));
 
     // Lock to 0 degrees while A is held
     controller
