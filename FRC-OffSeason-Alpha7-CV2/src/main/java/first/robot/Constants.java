@@ -99,9 +99,23 @@ public final class Constants {
     public static final CANPort kIntakeMotorCANPort = CANPort.CAN_S0;
     public static final CANBus kIntakeMotorCANBus = new CANBus(kIntakeMotorCANPort);
 
+    public static final int kIntakePivotEncoderID = 0;
+    public static final double kIntakePivotZero = 0;
+    public static final double kIntakePivotDeployAngle = 104.14;
+
     public static final int kIntakePivotID = 0;
     public static final int kIntakeRoller1ID = 0;
     public static final int kIntakeRoller2ID = 0;
+
+    public static final double kIntakePivotDeployPower = 0.5;
+    public static final double kIntakePivotStowPower = -0.5;
+
+    public static final double kIntakeRollerInPower = 0.5;
+    public static final double kIntakeRollerOutPower = -0.5;
+
+    public static final double kIntakePIDp = 0.8;
+    public static final double kIntakePIDi = 0.0;
+    public static final double kIntakePIDd = 0.0;
   }
 
   private Constants() {}

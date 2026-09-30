@@ -3,50 +3,139 @@ package first.robot.subsystems;
 import java.util.concurrent.CancellationException;
 
 import org.wpilib.command2.SubsystemBase;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.controls.DutyCycleOut;
+import org.wpilib.hardware.rotation.DutyCycleEncoder;
 
-import first.robot.Constants.IntakeConstants;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.NeutralOut;
+import org.wpilib.math.controller.PIDController;
+import org.wpilib.units.measure.AngularVelocity;
+
+
+import static first.robot.Constants.IntakeConstants.*;
 
 public class Intake extends SubsystemBase 
 {
-    TalonFX IntakeRollerMotor1;
-    TalonFX IntakeRollerMotor2;
-    TalonFX IntakePivotMotor;
+    private TalonFX IntakeRollerMotor1;
+    private TalonFX IntakeRollerMotor2;
+    private TalonFX IntakePivotMotor;
 
-    private DutyCycleOut powerRequest;
+    private DutyCycleEncoder IntakePivotEncoder;
+
+    private DutyCycleOut mintakePowerRequest;
+    private NeutralOut mstopRequest;
+
+    private PIDController intakePID;
+
+    private boolean isDeployed;
 
     public Intake ()
     {
-        IntakeRollerMotor1 = new TalonFX (IntakeConstants.kIntakeRoller1ID, IntakeConstants.kIntakeMotorCANBus);
-        IntakeRollerMotor2 = new TalonFX (IntakeConstants.kIntakeRoller2ID, IntakeConstants.kIntakeMotorCANBus);
-        IntakePivotMotor = new TalonFX (IntakeConstants.kIntakePivotID, IntakeConstants.kIntakeMotorCANBus);
+        IntakeRollerMotor1 = new TalonFX (kIntakeRoller1ID, kIntakeMotorCANBus);
+        IntakeRollerMotor2 = new TalonFX (kIntakeRoller2ID, kIntakeMotorCANBus);
+        IntakePivotMotor = new TalonFX (kIntakePivotID, kIntakeMotorCANBus);
 
-        powerRequest = new DutyCycleOut(0);
+        IntakePivotEncoder = new DutyCycleEncoder(kIntakePivotEncoderID, kIntakePivotZero, kIntakePivotDeployAngle);
+
+        mintakePowerRequest = new DutyCycleOut(0);
+        mstopRequest = new NeutralOut();
+
+        intakePID = new PIDController(kIntakePIDp, kIntakePIDi, kIntakePIDd);
+
+        isDeployed = false;
+    }
+
+    public void configureIntakeMotors()
+    {
+        final TalonFXConfiguration roller1Config = new TalonFXConfiguration()
+            .withMotorOutput(
+            new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake)
+            );
+
+        final TalonFXConfiguration roller2Config = new TalonFXConfiguration()
+            .withMotorOutput(
+            new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake)
+            );
+
+        final TalonFXConfiguration pivotConfig = new TalonFXConfiguration()
+            .withMotorOutput(
+            new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake)
+            );
+
+        IntakeRollerMotor1.getConfigurator().apply(roller1Config);
+        IntakeRollerMotor2.getConfigurator().apply(roller2Config);
+        IntakePivotMotor.getConfigurator().apply(pivotConfig);
     }
 
     public void stopIntakeRollers ()
     {
-        powerRequest.Output = 0;
+        IntakeRollerMotor1.setControl(mstopRequest);
+        IntakeRollerMotor2.setControl(mstopRequest);
+    }
 
-        IntakeRollerMotor1.setControl(powerRequest);
-        IntakeRollerMotor1.setControl(powerRequest);
+    public void stopIntakePivot ()
+    {
+        IntakePivotMotor.setControl(mstopRequest);
     }
 
     public void setIntakeRollerPower(double power)
     {
-        powerRequest.Output = power;
-        IntakeRollerMotor1.setControl(powerRequest);
-                        // Likely bad practice to alter one power request multiple times in one method; look in to later
-        powerRequest.Output = -power;
-        IntakeRollerMotor1.setControl(powerRequest);
+        IntakeRollerMotor1.setControl(mintakePowerRequest.withOutput(power));
+        IntakeRollerMotor2.setControl(mintakePowerRequest.withOutput(power));
     }
 
     public void setIntakePivotPower(double power)
     {
-        powerRequest.Output = power;
+        IntakePivotMotor.setControl(mintakePowerRequest.withOutput(power));
+    }
 
-        IntakePivotMotor.setControl(powerRequest);
+    public void setDeployed (boolean deployed)
+    {
+        isDeployed = deployed;
+    }
+
+    public double getIntakeEncoder()
+    {
+        return IntakePivotEncoder.get();
+    }
+
+    public double getIntakeRollerVelocityRPM()
+    {
+        StatusSignal<AngularVelocity> v1 = IntakeRollerMotor1.getVelocity();
+        StatusSignal<AngularVelocity> v2 = IntakeRollerMotor2.getVelocity();
+
+        v1.refresh();
+        v2.refresh();
+
+        return ((v1.getValueAsDouble() + v2.getValueAsDouble()) / 2) * 60;
+    }
+
+    public boolean isDeployed ()
+    {
+        return isDeployed;
+    }
+
+    public void intakePivotToPosition (double position)
+    {
+        double power = intakePID.calculate(getIntakeEncoder(), position);
+
+        setIntakePivotPower(power);
+    }
+
+    public void resetIntakePIDPivot ()
+    {
+        intakePID.reset();
     }
 
     @Override
