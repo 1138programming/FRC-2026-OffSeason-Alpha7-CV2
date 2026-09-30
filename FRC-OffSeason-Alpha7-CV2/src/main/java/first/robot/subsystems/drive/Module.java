@@ -9,8 +9,6 @@ package first.robot.subsystems.drive;
 
 import first.robot.Constants;
 import first.robot.Constants.Mode;
-import first.robot.subsystems.drive.ModuleIO.ModuleIOInputs;
-
 import org.littletonrobotics.junction.Logger;
 import org.wpilib.driverstation.RobotState;
 import org.wpilib.math.controller.SimpleMotorFeedforward;
