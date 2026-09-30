@@ -4,15 +4,10 @@
 
 package first.robot;
 
-import java.security.KeyException;
-import java.security.KeyFactory;
-
 import org.wpilib.framework.RobotBase;
 import org.wpilib.hardware.bus.CANPort;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
-
-import com.ctre.phoenix6.CANBus;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
