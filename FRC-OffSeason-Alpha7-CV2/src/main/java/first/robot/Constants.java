@@ -92,5 +92,21 @@ public final class Constants {
     }
   }
 
+  public static class OperatorConstants {
+    //Logitech Button Constants
+    public static final int kLOGITECH_BUTTON_A = 0;
+    public static final int kLOGITECH_BUTTON_B = 1;
+    public static final int kLOGITECH_BUTTON_Y = 3;
+    public static final int kLOGITECH_BUTTON_X = 2;
+    public static final int kLOGITECH_BUTTON_LB = 9;
+    public static final int kLOGITECH_BUTTON_RB = 10;
+    public static final int kLOGITECH_BUTTON_LT = 17;
+    public static final int kLOGITECH_BUTTON_RT = 16;
+    public static final int kLOGITECH_BUTTON_BACK = 4;
+    public static final int kLOGITECH_BUTTON_START = 6;
+
+
+  }
+
   private Constants() {}
 }
