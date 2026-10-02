@@ -5,6 +5,7 @@
 package first.robot;
 
 import org.wpilib.framework.RobotBase;
+import org.wpilib.hardware.bus.CANPort;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
 
@@ -117,4 +118,13 @@ public final class Constants {
   }
 
   private Constants() {}
+
+  public static class IndexerConstants{
+    public static final CANPort kS0 = CANPort.CAN_S0;
+    public static final int kindexerLeftID = 0;
+    public static final int kindexerRightID = 0;
+
+    public static final double kindexInPower = 0.576;
+    public static final double kindexOutPower = -0.576;
+  }
 }
