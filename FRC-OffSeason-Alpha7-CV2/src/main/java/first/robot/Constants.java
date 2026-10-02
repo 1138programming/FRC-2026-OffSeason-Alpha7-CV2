@@ -123,17 +123,14 @@ public final class Constants {
     public static final double kINDEX_IN_POWER = 0.576;
     public static final double kINDEX_OUT_POWER = -0.576;
   }
-
-  private Constants() {}
-
   public static class ShooterConstants{
-    public static final CANPort kshooterMotorCANbus = CANPort.CAN_S0;
+    public static final CANPort kSHOOTER_MOTOR_CANBUS = CANPort.CAN_S0;
 
-    public static final int kshooterMotor1ID = 0;
-    public static final int kshooterMotor2ID = 0;
-    public static final int kshooterMotor3ID = 0;
+    public static final int kSHOOTER_MOTOR_1_ID = 0;
+    public static final int kSHOOTER_MOTOR_2_ID = 0;
+    public static final int kSHOOTER_MOTOR_3_ID = 0;
 
-    public static final double kFlywheelGearRatio = 2.0 / 3.0; // flywheel rotations per motor rotation
+    public static final double kFLYWHEEL_GEAR_RATIO = 2.0 / 3.0; // flywheel rotations per motor rotation
 
     // VelocityVoltage gains, in volts per flywheel rotation per second (starting points - tune on robot)
     public static final double kS = 0.15;
@@ -142,10 +139,19 @@ public final class Constants {
     public static final double kI = 0;
     public static final double kD = 0;
 
-    public static final double kFlywheelToleranceRPM = 50;
+    //current limits -> shooter draws a lot of power
+    public static final double kSHOOTER_STATOR_CURRENT_LIMIT = 100;
+    public static final double kSHOOTER_SUPPLY_CURRENT_LIMIT = 60;
+
+    public static final double kFLYWHEEL_TOLERANCE_RPM = 50;
+
+    public static final double kFLYWHEEL_DEFAULT_RPM = 40;
 
     // Set to Opposed if a follower motor faces the opposite direction of motor 1
-    public static final MotorAlignmentValue kshooterMotor2Alignment = MotorAlignmentValue.Aligned;
-    public static final MotorAlignmentValue kshooterMotor3Alignment = MotorAlignmentValue.Aligned;
+    public static final MotorAlignmentValue kSHOOTER_MOTOR_2_ALIGNMENT = MotorAlignmentValue.Aligned;
+    public static final MotorAlignmentValue kSHOOTER_MOTOR_3_ALIGNMENT = MotorAlignmentValue.Aligned;
   }
+
+  private Constants() {}
+
 }

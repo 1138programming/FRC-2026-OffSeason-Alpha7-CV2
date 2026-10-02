@@ -9,12 +9,17 @@ import static first.robot.Constants.ShooterConstants.*;
 import static first.robot.subsystems.drive.ModuleIOTalonFX.tryUntilOk;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class Shooter extends SubsystemBase {
@@ -30,25 +35,15 @@ public class Shooter extends SubsystemBase {
 
   /** Creates a new Shooter. */
   public Shooter() {
-    canBus = new CANBus(kshooterMotorCANbus);
-    shooterMotor1 = new TalonFX(kshooterMotor1ID, canBus);
-    shooterMotor2 = new TalonFX(kshooterMotor2ID, canBus);
-    shooterMotor3 = new TalonFX(kshooterMotor3ID, canBus);
+    canBus = new CANBus(kSHOOTER_MOTOR_CANBUS);
+    shooterMotor1 = new TalonFX(kSHOOTER_MOTOR_1_ID, canBus);
+    shooterMotor2 = new TalonFX(kSHOOTER_MOTOR_2_ID, canBus);
+    shooterMotor3 = new TalonFX(kSHOOTER_MOTOR_3_ID, canBus);
 
-    TalonFXConfiguration config = new TalonFXConfiguration();
-    config.MotorOutput.NeutralMode = NeutralModeValue.Coast; 
-    config.Feedback.SensorToMechanismRatio = 1.0 / kFlywheelGearRatio; // 3 motor rotations per 2 flywheel rotations
-    config.Slot0.kS = kS;
-    config.Slot0.kV = kV;
-    config.Slot0.kP = kP;
-    config.Slot0.kI = kI;
-    config.Slot0.kD = kD;
-    tryUntilOk(5, () -> shooterMotor1.getConfigurator().apply(config, 0.25));
-    tryUntilOk(5, () -> shooterMotor2.getConfigurator().apply(config, 0.25));
-    tryUntilOk(5, () -> shooterMotor3.getConfigurator().apply(config, 0.25));
+    configureShooterMotor();
 
-    shooterMotor2.setControl(new Follower(kshooterMotor1ID, kshooterMotor2Alignment));
-    shooterMotor3.setControl(new Follower(kshooterMotor1ID, kshooterMotor3Alignment));
+    shooterMotor2.setControl(new Follower(kSHOOTER_MOTOR_1_ID, kSHOOTER_MOTOR_2_ALIGNMENT));
+    shooterMotor3.setControl(new Follower(kSHOOTER_MOTOR_1_ID, kSHOOTER_MOTOR_3_ALIGNMENT));
 
     shooterMotorPowerRequest = new DutyCycleOut(0.0);
     shooterVelocityRequest = new VelocityVoltage(0.0).withSlot(0);
@@ -56,6 +51,39 @@ public class Shooter extends SubsystemBase {
 
     flywheelVelocitySignal = shooterMotor1.getVelocity();
     flywheelVelocitySignal.setUpdateFrequency(100);
+  }
+
+  private void configureShooterMotor() {
+    final TalonFXConfiguration config = new TalonFXConfiguration()
+      .withMotorOutput(
+        new MotorOutputConfigs()
+          .withInverted(InvertedValue.Clockwise_Positive)
+          .withNeutralMode(NeutralModeValue.Coast)
+      )
+      .withFeedback(
+        new FeedbackConfigs()
+          .withSensorToMechanismRatio(1 / kFLYWHEEL_GEAR_RATIO)
+      )
+      .withSlot0(
+        new Slot0Configs()
+          .withKS(kS)
+          .withKV(kV)
+          .withKP(kP)
+          .withKI(kI)
+          .withKD(kD)
+      )
+      .withCurrentLimits(
+        //if experiencing power issues, check here
+        new CurrentLimitsConfigs()
+          .withStatorCurrentLimit(kSHOOTER_STATOR_CURRENT_LIMIT)
+          .withStatorCurrentLimitEnable(true)
+          .withSupplyCurrentLimit(kSHOOTER_SUPPLY_CURRENT_LIMIT)
+          .withSupplyCurrentLimitEnable(true) 
+      );
+      
+    tryUntilOk(5, () -> shooterMotor1.getConfigurator().apply(config, 0.25));
+    tryUntilOk(5, () -> shooterMotor2.getConfigurator().apply(config, 0.25));
+    tryUntilOk(5, () -> shooterMotor3.getConfigurator().apply(config, 0.25));
   }
 
   public void spinFlywheelMotors(double power){
@@ -79,7 +107,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean isFlywheelAtSpeed(){
-    return targetRPM > 0.0 && Math.abs(getFlywheelRPM() - targetRPM) <= kFlywheelToleranceRPM;
+    return targetRPM > 0.0 && Math.abs(getFlywheelRPM() - targetRPM) <= kFLYWHEEL_TOLERANCE_RPM;
   }
 
   @Override

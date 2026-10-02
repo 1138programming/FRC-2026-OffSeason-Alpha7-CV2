@@ -16,6 +16,7 @@ import org.wpilib.math.geometry.Rotation2d;
 //subsystems
 import first.robot.subsystems.ActiveFloor;
 import first.robot.subsystems.Indexer;
+import first.robot.subsystems.Shooter;
 //commands
 import first.robot.commands.ActiveFloor.FloorInward;
 import first.robot.commands.ActiveFloor.FloorOutward;
@@ -23,6 +24,7 @@ import first.robot.commands.IndexerCommands.IndexInCommand;
 import first.robot.commands.IndexerCommands.IndexOutCommand;
 //drive
 import first.robot.commands.DriveCommands;
+import first.robot.commands.SpinShooterAtRPMCommand;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
 import first.robot.subsystems.drive.GyroIO;
@@ -46,6 +48,7 @@ import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_OUTWARD;
 import static first.robot.Constants.IndexerConstants.kINDEX_IN_POWER;
 import static first.robot.Constants.IndexerConstants.kINDEX_OUT_POWER;
 import static first.robot.Constants.OperatorConstants.*;
+import static first.robot.Constants.ShooterConstants.kFLYWHEEL_DEFAULT_RPM;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -59,12 +62,14 @@ public class RobotContainer {
 
   public final ActiveFloor activeFloor;
   public final Indexer indexer;
+  public final Shooter shooter;
 
   //commands
   public final FloorInward floorInward;
   public final FloorOutward floorOutward;
   public final IndexInCommand indexIn;
   public final IndexOutCommand indexOut;
+  public final SpinShooterAtRPMCommand spinShooterAtRPM;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -114,12 +119,14 @@ public class RobotContainer {
     //subsystems
     activeFloor = new ActiveFloor();
     indexer = new Indexer();
+    shooter = new Shooter();
 
     //commands
     floorInward = new FloorInward(activeFloor, kFLOOR_POWER_INWARD);
     floorOutward = new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD);
     indexIn = new IndexInCommand(indexer, kINDEX_IN_POWER);
-    indexOut = new IndexOutCommand(indexer, kINDEX_OUT_POWER); 
+    indexOut = new IndexOutCommand(indexer, kINDEX_OUT_POWER);
+    spinShooterAtRPM = new SpinShooterAtRPMCommand(shooter, kFLYWHEEL_DEFAULT_RPM); 
 
     switch (Constants.getMode()) {
       case REAL ->
@@ -239,6 +246,9 @@ public class RobotContainer {
     //indexer buttons
     logitechButtonY.whileTrue(indexIn);
     logitechButtonA.whileTrue(indexOut);
+
+    //flywheel/shooter
+    logitechButtonRT.whileTrue(spinShooterAtRPM);
 
   }
 
