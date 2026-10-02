@@ -13,6 +13,14 @@ import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 
+//subsystems
+import first.robot.subsystems.ActiveFloor;
+
+//commands
+import first.robot.commands.ActiveFloor.FloorInward;
+import first.robot.commands.ActiveFloor.FloorOutward;
+
+//drive
 import first.robot.commands.DriveCommands;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
@@ -22,6 +30,8 @@ import first.robot.subsystems.drive.ModuleIO;
 import first.robot.subsystems.drive.ModuleIOSim;
 import first.robot.subsystems.drive.ModuleIOTalonFX;
 
+import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_INWARD;
+import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_OUTWARD;
 import static first.robot.Constants.OperatorConstants.*;
 
 /**
@@ -33,6 +43,12 @@ import static first.robot.Constants.OperatorConstants.*;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+
+  public final ActiveFloor activeFloor;
+
+  //commands
+  public final FloorInward floorInward;
+  public final FloorOutward floorOutward;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -79,6 +95,12 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
+    //subsystems
+    activeFloor = new ActiveFloor();
+
+    //commands
+    floorInward = new FloorInward(activeFloor, kFLOOR_POWER_INWARD);
+    floorOutward = new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD);
 
     switch (Constants.getMode()) {
       case REAL ->
@@ -183,14 +205,16 @@ public class RobotContainer {
     // Switch to X pattern when X is pressed
     controller.faceLeft().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset the gyro heading to 0 degrees when B is pressed
-    controller
-        .faceRight()
+    // Reset the gyro heading to 0 degrees when 'Back' is pressed
+    logitechButtonBack
         .onTrue(
             Commands.runOnce(
                     () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.ZERO)),
                     drive)
                 .ignoringDisable(true));
+    
+    logitechButtonB.whileTrue(floorInward);
+    logitechButtonX.whileFalse(floorOutward);
 
     
   }

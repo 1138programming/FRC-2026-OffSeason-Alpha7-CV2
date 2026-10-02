@@ -98,7 +98,8 @@ public final class Constants {
 
     public static final double kFLOOR_POWER_INWARD = 0.5;
     public static final double kFLOOR_POWER_OUTWARD = -0.5;
-    
+  }
+   
   public static class OperatorConstants {
     //Logitech Button Constants
     public static final int kLOGITECH_BUTTON_A = 0;

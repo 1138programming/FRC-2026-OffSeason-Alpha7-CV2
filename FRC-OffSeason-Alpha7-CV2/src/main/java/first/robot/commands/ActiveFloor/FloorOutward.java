@@ -14,10 +14,12 @@ import first.robot.subsystems.ActiveFloor;
 public class FloorOutward extends Command {
 
   private ActiveFloor activeFloor;
+  private double power;
 
   /** Creates a new FloorOutward. */
-  public FloorOutward(ActiveFloor activeFloor) {
+  public FloorOutward(ActiveFloor activeFloor, double power) {
     this.activeFloor = activeFloor;
+    this.power = power;
     addRequirements(activeFloor);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -29,7 +31,7 @@ public class FloorOutward extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    activeFloor.setFloorPower(kFLOOR_POWER_OUTWARD);
+    activeFloor.setFloorPower(power);
   }
 
   // Called once the command ends or is interrupted.
