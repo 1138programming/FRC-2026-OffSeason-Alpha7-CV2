@@ -23,7 +23,7 @@ import org.wpilib.units.measure.AngularVelocity;
 /** IMU implementation for the CTRE Pigeon 2 on the CAN bus. */
 public class GyroIOPigeon2 implements GyroIO {
   private final Pigeon2 pigeon =
-      new Pigeon2(DriveConstants.PigeonConstants.id, new CANBus(CANPort.CAN_S0));
+      new Pigeon2(DriveConstants.PigeonConstants.id, new CANBus("*"));
 
   private final StatusSignal<Angle> yaw = pigeon.getYaw();
   private final StatusSignal<AngularVelocity> yawVelocity = pigeon.getAngularVelocityZWorld();
@@ -34,7 +34,7 @@ public class GyroIOPigeon2 implements GyroIO {
     ModuleIOTalonFX.tryUntilOk(5, () -> pigeon.setYaw(0.0, 0.25));
 
     // Yaw feeds odometry every loop; the rate signal is only used for logging.
-    yaw.setUpdateFrequency(1.0 / Constants.loopPeriodSecs);
+    yaw.setUpdateFrequency(1.0 / Constants.kLOOPPERIODSECS);
     yawVelocity.setUpdateFrequency(50.0);
     pigeon.optimizeBusUtilization();
   }

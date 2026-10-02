@@ -21,8 +21,6 @@ import org.wpilib.math.numbers.N3;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
 import first.robot.Constants.Mode;
-import first.robot.subsystems.drive.GyroIO.GyroIOInputs;
-
 import org.wpilib.driverstation.DriverStation;
 import org.wpilib.driverstation.RobotState;
 import org.wpilib.system.Timer;
@@ -120,7 +118,7 @@ public class Drive extends SubsystemBase {
     System.out.println("Hello Run Velocity: " + speeds.toString());
     System.out.println("Current Position: " + getPose());
     // Calculate module setpoints
-    ChassisVelocities discreteSpeeds = speeds.discretize(Constants.loopPeriodSecs);
+    ChassisVelocities discreteSpeeds = speeds.discretize(Constants.kLOOPPERIODSECS);
     // desaturateWheelVelocities returns a new array rather than mutating in place, so its result
     // must be used or the speed limit is silently ignored.
     SwerveModuleVelocity[] setpointStates =

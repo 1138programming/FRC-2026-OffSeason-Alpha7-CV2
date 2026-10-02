@@ -24,12 +24,12 @@ public class Robot extends LoggedRobot {
 
   public Robot() {
     // Run the loop at the period the rest of the code assumes (see Constants.loopPeriodSecs).
-    super(Constants.loopPeriodSecs);
+    super(Constants.kLOOPPERIODSECS);
 
     // Record build/runtime metadata so logs can be traced back to a configuration
     Logger.recordMetadata("RobotType", Constants.getRobot().toString());
     Logger.recordMetadata("RuntimeMode", Constants.getMode().toString());
-    Logger.recordMetadata("TuningMode", Boolean.toString(Constants.tuningMode));
+    Logger.recordMetadata("TuningMode", Boolean.toString(Constants.kTUNINGMODE));
 
     // Set up data receivers & replay source
     switch (Constants.getMode()) {
