@@ -4,6 +4,7 @@
 
 package first.robot;
 
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.hardware.bus.CANPort;
 import org.wpilib.util.Alert;
@@ -125,4 +126,26 @@ public final class Constants {
 
   private Constants() {}
 
+  public static class ShooterConstants{
+    public static final CANPort kshooterMotorCANbus = CANPort.CAN_S0;
+
+    public static final int kshooterMotor1ID = 0;
+    public static final int kshooterMotor2ID = 0;
+    public static final int kshooterMotor3ID = 0;
+
+    public static final double kFlywheelGearRatio = 2.0 / 3.0; // flywheel rotations per motor rotation
+
+    // VelocityVoltage gains, in volts per flywheel rotation per second (starting points - tune on robot)
+    public static final double kS = 0.15;
+    public static final double kV = 0.18;
+    public static final double kP = 0.1;
+    public static final double kI = 0;
+    public static final double kD = 0;
+
+    public static final double kFlywheelToleranceRPM = 50;
+
+    // Set to Opposed if a follower motor faces the opposite direction of motor 1
+    public static final MotorAlignmentValue kshooterMotor2Alignment = MotorAlignmentValue.Aligned;
+    public static final MotorAlignmentValue kshooterMotor3Alignment = MotorAlignmentValue.Aligned;
+  }
 }
