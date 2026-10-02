@@ -12,9 +12,11 @@ import static first.robot.Constants.IndexerConstants.*;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class IndexOutCommand extends Command {
   Indexer indexer;
+  double power;
   /** Creates a new IndexOutCommand. */
-  public IndexOutCommand(Indexer indexer) {
+  public IndexOutCommand(Indexer indexer, double power) {
     this.indexer = indexer;
+    this.power = power;
     addRequirements(indexer);
   }
 
@@ -25,7 +27,7 @@ public class IndexOutCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    indexer.spinIndexerMotors(kindexOutPower);
+    indexer.spinIndexerMotors(power);
   }
 
   // Called once the command ends or is interrupted.

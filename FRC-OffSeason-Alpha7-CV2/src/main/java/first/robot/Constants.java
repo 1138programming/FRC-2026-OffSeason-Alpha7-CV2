@@ -113,18 +113,16 @@ public final class Constants {
     public static final int kLOGITECH_BUTTON_RT = 16;
     public static final int kLOGITECH_BUTTON_BACK = 4;
     public static final int kLOGITECH_BUTTON_START = 6;
+  }
+  public static class IndexerConstants{
+    public static final CANPort kS0 = CANPort.CAN_S0;
+    public static final int kINDEXER_LEFT_ID = 0;
+    public static final int kINDEXER_RIGHT_ID = 0;
 
-
+    public static final double kINDEX_IN_POWER = 0.576;
+    public static final double kINDEX_OUT_POWER = -0.576;
   }
 
   private Constants() {}
 
-  public static class IndexerConstants{
-    public static final CANPort kS0 = CANPort.CAN_S0;
-    public static final int kindexerLeftID = 0;
-    public static final int kindexerRightID = 0;
-
-    public static final double kindexInPower = 0.576;
-    public static final double kindexOutPower = -0.576;
-  }
 }
