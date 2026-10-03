@@ -16,7 +16,7 @@ import org.wpilib.units.measure.Time;
 import org.wpilib.units.measure.Voltage;
 
 public class CANRangeIOReal implements CANRangeIO {
-  private final CANrange canrange = new CANrange(kCANrangeID, new CANBus(CANPort.CAN_S0));
+  private final CANrange canrange = new CANrange(kCANrangeID, new CANBus("*"));
 
   private final StatusSignal<Distance> distance = canrange.getDistance();
   private final StatusSignal<Distance> distanceStdDev = canrange.getDistanceStdDev();

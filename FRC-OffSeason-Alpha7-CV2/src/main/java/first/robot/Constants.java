@@ -95,6 +95,6 @@ public final class Constants {
   private Constants() {}
 
   public static class CANRangeConstants{
-    public static final int kCANrangeID = 0; //TO-DO: set real id
+    public static final int kCANrangeID = 6; //TO-DO: set real id
   }
 }
