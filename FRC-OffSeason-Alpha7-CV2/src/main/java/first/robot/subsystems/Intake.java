@@ -36,16 +36,16 @@ public class Intake extends SubsystemBase
 
     public Intake ()
     {
-        IntakeRollerMotor1 = new TalonFX (kIntakeRoller1ID, kIntakeMotorCANBus);
-        IntakeRollerMotor2 = new TalonFX (kIntakeRoller2ID, kIntakeMotorCANBus);
-        IntakePivotMotor = new TalonFX (kIntakePivotID, kIntakeMotorCANBus);
+        IntakeRollerMotor1 = new TalonFX (kINTAKE_ROLLER_1_ID, kINTAKE_MOTOR_CANBUS);
+        IntakeRollerMotor2 = new TalonFX (kINTAKE_ROLLER_2_ID, kINTAKE_MOTOR_CANBUS);
+        IntakePivotMotor = new TalonFX (kINTAKE_PIVOT_ID, kINTAKE_MOTOR_CANBUS);
 
-        IntakePivotEncoder = new DutyCycleEncoder(kIntakePivotEncoderID, kIntakePivotZero, kIntakePivotDeployAngle);
+        IntakePivotEncoder = new DutyCycleEncoder(kINTAKE_PIVOT_ENCODER_ID, kINTAKE_PIVOT_ZERO, kINTAKE_PIVOT_DEPLOY_ANGLE);
 
         mintakePowerRequest = new DutyCycleOut(0);
         mstopRequest = new NeutralOut();
 
-        intakePID = new PIDController(kIntakePIDp, kIntakePIDi, kIntakePIDd);
+        intakePID = new PIDController(kINTAKE_P, kINTAKE_I, kINTAKE_D);
 
         isDeployed = false;
     }

@@ -28,7 +28,7 @@ public class IntakeRollerIn extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        intake.setIntakeRollerPower(kIntakeRollerInPower);
+        intake.setIntakeRollerPower(kINTAKE_ROLLER_IN_POWER);
     }
 
     // Called once the command ends or is interrupted.

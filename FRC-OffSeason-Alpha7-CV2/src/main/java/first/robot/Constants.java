@@ -96,30 +96,30 @@ public final class Constants {
     }
   }
 
+  // ------- Subsystem constants ----- //
   public static class IntakeConstants {
 
-    public static final CANPort kIntakeMotorCANPort = CANPort.CAN_S0;
-    public static final CANBus kIntakeMotorCANBus = new CANBus(kIntakeMotorCANPort);
+    public static final CANPort kINTAKE_MOTOR_CAN_PORT = CANPort.CAN_S0;
+    public static final CANBus kINTAKE_MOTOR_CANBUS = new CANBus(kINTAKE_MOTOR_CAN_PORT);
 
-    public static final int kIntakePivotEncoderID = 0;
-    public static final double kIntakePivotZero = 0;
-    public static final double kIntakePivotDeployAngle = 104.14;
+    public static final int kINTAKE_PIVOT_ENCODER_ID = 0;
+    public static final double kINTAKE_PIVOT_ZERO = 0;
+    public static final double kINTAKE_PIVOT_DEPLOY_ANGLE = 104.14;
 
-    public static final int kIntakePivotID = 0;
-    public static final int kIntakeRoller1ID = 0;
-    public static final int kIntakeRoller2ID = 0;
+    public static final int kINTAKE_PIVOT_ID = 0;
+    public static final int kINTAKE_ROLLER_1_ID = 0;
+    public static final int kINTAKE_ROLLER_2_ID = 0;
 
-    public static final double kIntakePivotDeployPower = 0.5;
-    public static final double kIntakePivotStowPower = -0.5;
+    public static final double kINTAKE_PIVOT_DEPLOY_POWER = 0.5;
+    public static final double kINTAKE_PIVOT_STOW_POWER = -0.5;
 
-    public static final double kIntakeRollerInPower = 0.5;
-    public static final double kIntakeRollerOutPower = -0.5;
+    public static final double kINTAKE_ROLLER_IN_POWER = 0.5;
+    public static final double kINTAKE_ROLLER_OUT_POWER = -0.5;
 
-    public static final double kIntakePIDp = 0.8;
-    public static final double kIntakePIDi = 0.0;
-    public static final double kIntakePIDd = 0.0;
+    public static final double kINTAKE_P = 0.8;
+    public static final double kINTAKE_I = 0.0;
+    public static final double kINTAKE_D = 0.0;
   }
-  // ------- Subsystem constants ----- //
   public static class ActiveFloorConstants {
     public static final int kFLOOR_ROLLER_MOTOR_ID = 9;
 
