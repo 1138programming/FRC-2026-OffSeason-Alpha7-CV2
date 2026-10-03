@@ -6,16 +6,19 @@ package first.robot.commands.IndexerCommands;
 
 import org.wpilib.command2.Command;
 
+import first.robot.subsystems.CANRangeSensor;
 import first.robot.subsystems.Indexer;
 
-
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class IndexOutCommand extends Command {
+public class IndexUntilBallIn extends Command {
+  CANRangeSensor canRangeSensor;
   Indexer indexer;
-  /** Creates a new IndexOutCommand. */
-  public IndexOutCommand(Indexer indexer) {
+
+  /** Creates a new IndexUntilBallIn. */
+  public IndexUntilBallIn(CANRangeSensor canRangeSensor, Indexer indexer) {
+    this.canRangeSensor = canRangeSensor;
     this.indexer = indexer;
-    addRequirements(indexer);
+    addRequirements(canRangeSensor, indexer);
   }
 
   // Called when the command is initially scheduled.
@@ -25,18 +28,16 @@ public class IndexOutCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    indexer.spinIndexerOut();
+    indexer.spinIndexerIn();
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    indexer.stopIndexerMotors();
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return canRangeSensor.IsBallInIndexer();
   }
 }
