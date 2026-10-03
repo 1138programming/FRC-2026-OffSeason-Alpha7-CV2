@@ -8,11 +8,16 @@ import org.wpilib.hardware.rotation.DutyCycleEncoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
+
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.units.measure.AngularVelocity;
 
@@ -28,6 +33,7 @@ public class Intake extends SubsystemBase
     private DutyCycleEncoder IntakePivotEncoder;
 
     private DutyCycleOut mintakePowerRequest;
+    private PositionVoltage mintakePositionRequest;
     private NeutralOut mstopRequest;
 
     private PIDController intakePID;
@@ -36,13 +42,18 @@ public class Intake extends SubsystemBase
 
     public Intake ()
     {
-        IntakeRollerMotor1 = new TalonFX (kINTAKE_ROLLER_1_ID, kINTAKE_MOTOR_CANBUS);
-        IntakeRollerMotor2 = new TalonFX (kINTAKE_ROLLER_2_ID, kINTAKE_MOTOR_CANBUS);
-        IntakePivotMotor = new TalonFX (kINTAKE_PIVOT_ID, kINTAKE_MOTOR_CANBUS);
+        IntakeRollerMotor1 = new TalonFX (kINTAKE_ROLLER_1_ID, new CANBus(kINTAKE_MOTOR_CAN_PORT));
+        IntakeRollerMotor2 = new TalonFX (kINTAKE_ROLLER_2_ID,  new CANBus(kINTAKE_MOTOR_CAN_PORT));
+        IntakePivotMotor = new TalonFX (kINTAKE_PIVOT_ID, new CANBus(kINTAKE_MOTOR_CAN_PORT));
 
-        IntakePivotEncoder = new DutyCycleEncoder(kINTAKE_PIVOT_ENCODER_ID, kINTAKE_PIVOT_ZERO, kINTAKE_PIVOT_DEPLOY_ANGLE);
+        IntakeRollerMotor2.setControl(new Follower(kINTAKE_ROLLER_1_ID, kINTAKE_ROLLER_2_ALIGNMENT));
+
+        configureIntakeMotors();
+
+        IntakePivotEncoder = new DutyCycleEncoder(kINTAKE_PIVOT_ENCODER_ID, 360, kINTAKE_PIVOT_ZERO);
 
         mintakePowerRequest = new DutyCycleOut(0);
+        mintakePositionRequest = new PositionVoltage(0).withSlot(0);
         mstopRequest = new NeutralOut();
 
         intakePID = new PIDController(kINTAKE_P, kINTAKE_I, kINTAKE_D);
@@ -52,36 +63,35 @@ public class Intake extends SubsystemBase
 
     public void configureIntakeMotors()
     {
-        final TalonFXConfiguration roller1Config = new TalonFXConfiguration()
-            .withMotorOutput(
-            new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
-            .withNeutralMode(NeutralModeValue.Brake)
-            );
 
-        final TalonFXConfiguration roller2Config = new TalonFXConfiguration()
+        final TalonFXConfiguration rollerConfig = new TalonFXConfiguration()
             .withMotorOutput(
-            new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
-            .withNeutralMode(NeutralModeValue.Brake)
+                new MotorOutputConfigs()
+                .withInverted(InvertedValue.Clockwise_Positive)
+                .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withSlot0(
+                new Slot0Configs()
+                .withKP(kINTAKE_P)
+                .withKI(kINTAKE_I)
+                .withKD(kINTAKE_D)
             );
 
         final TalonFXConfiguration pivotConfig = new TalonFXConfiguration()
             .withMotorOutput(
-            new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
-            .withNeutralMode(NeutralModeValue.Brake)
+                new MotorOutputConfigs()
+                .withInverted(InvertedValue.Clockwise_Positive)
+                .withNeutralMode(NeutralModeValue.Brake)
             );
 
-        IntakeRollerMotor1.getConfigurator().apply(roller1Config);
-        IntakeRollerMotor2.getConfigurator().apply(roller2Config);
+        IntakeRollerMotor1.getConfigurator().apply(rollerConfig);
+        IntakeRollerMotor2.getConfigurator().apply(rollerConfig);
         IntakePivotMotor.getConfigurator().apply(pivotConfig);
     }
 
     public void stopIntakeRollers ()
     {
         IntakeRollerMotor1.setControl(mstopRequest);
-        IntakeRollerMotor2.setControl(mstopRequest);
     }
 
     public void stopIntakePivot ()
@@ -92,7 +102,6 @@ public class Intake extends SubsystemBase
     public void setIntakeRollerPower(double power)
     {
         IntakeRollerMotor1.setControl(mintakePowerRequest.withOutput(power));
-        IntakeRollerMotor2.setControl(mintakePowerRequest.withOutput(power));
     }
 
     public void setIntakePivotPower(double power)
@@ -129,7 +138,6 @@ public class Intake extends SubsystemBase
     public void intakePivotToPosition (double position)
     {
         double power = intakePID.calculate(getIntakeEncoder(), position);
-
         setIntakePivotPower(power);
     }
 

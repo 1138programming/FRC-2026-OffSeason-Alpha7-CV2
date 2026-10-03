@@ -110,6 +110,8 @@ public final class Constants {
     public static final int kINTAKE_ROLLER_1_ID = 0;
     public static final int kINTAKE_ROLLER_2_ID = 0;
 
+    public static final MotorAlignmentValue kINTAKE_ROLLER_2_ALIGNMENT = MotorAlignmentValue.Aligned;
+
     public static final double kINTAKE_PIVOT_DEPLOY_POWER = 0.5;
     public static final double kINTAKE_PIVOT_STOW_POWER = -0.5;
 
