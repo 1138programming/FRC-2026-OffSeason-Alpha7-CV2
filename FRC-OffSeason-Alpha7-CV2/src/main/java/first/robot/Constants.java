@@ -108,5 +108,9 @@ public final class Constants {
 
   }
 
+  public static class LimelightConstants{
+    public static final String klimelightName = "limelight";
+  }
+
   private Constants() {}
 }
