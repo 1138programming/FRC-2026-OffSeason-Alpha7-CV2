@@ -275,17 +275,18 @@ public class RobotContainer {
     //flywheel/shooter
     logitechButtonRT.whileTrue(spinShooterAtRPM);
 
+    double testVelocity = 0.5;
     logitechButtonDpadUp.whileTrue(
-        DriveCommands.runVelocity(drive, 1, 0, 0)
+        DriveCommands.runVelocity(drive, testVelocity, 0, 0)
     );
         logitechButtonDpadDown.whileTrue(
-        DriveCommands.runVelocity(drive, -1, 0, 0)
+        DriveCommands.runVelocity(drive, -testVelocity, 0, 0)
     );
         logitechButtonDpadLeft.whileTrue(
-        DriveCommands.runVelocity(drive, 0, 1, 0)
+        DriveCommands.runVelocity(drive, 0, testVelocity, 0)
     );
         logitechButtonDpadRight.whileTrue(
-        DriveCommands.runVelocity(drive, 0, -1, 0)
+        DriveCommands.runVelocity(drive, 0, -testVelocity, 0)
     );
 
   }
