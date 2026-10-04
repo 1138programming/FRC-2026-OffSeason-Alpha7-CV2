@@ -12,6 +12,9 @@ import org.wpilib.command2.button.JoystickButton;
 import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.driverstation.Alliance;
+import org.wpilib.driverstation.MatchState;
 
 import first.robot.commands.DriveCommands;
 import first.robot.subsystems.drive.Drive;
@@ -27,6 +30,7 @@ import first.robot.subsystems.vision.VisionIOLimelight;
 
 import static first.robot.Constants.OperatorConstants.*;
 import static first.robot.Constants.LimelightConstants.*;
+import static first.robot.Constants.FieldConstants.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -208,7 +212,22 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    
+    controller.rightBumper().whileTrue(
+    DriveCommands.joystickDriveAtAngle(
+        drive,
+        () -> -controller.getLeftY(),
+        () -> -controller.getLeftX(),
+        this::headingToGoal));
+
+
+  }
+
+  /** Field-relative heading that points the robot's front at our alliance's HUB. */
+  private Rotation2d headingToGoal() {
+    boolean isRed = MatchState.getAlliance().orElse(Alliance.BLUE) == Alliance.RED;
+    Translation2d goal = isRed ? kRED_HUB : kBLUE_HUB;
+    // getAngle() is empty only when the robot is exactly on the goal; hold heading then.
+    return goal.minus(drive.getPose().getTranslation()).getAngle().orElse(drive.getRotation());
   }
 
   /**
