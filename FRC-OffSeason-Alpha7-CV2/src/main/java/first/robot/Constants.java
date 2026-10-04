@@ -5,6 +5,9 @@
 package first.robot;
 
 import org.wpilib.framework.RobotBase;
+import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Rotation3d;
+import org.wpilib.math.util.Units;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
 
@@ -110,6 +113,10 @@ public final class Constants {
 
   public static class LimelightConstants{
     public static final String klimelightName = "limelight";
+
+  public static final Pose3d kROBOT_TO_CAMERA = new Pose3d(0.0, 0.0, 0.0, new Rotation3d(0.0, 0.0, 0.0));
+  public static final double kMAX_YAW_RATE_RAD_PER_SEC = Units.degreesToRadians(360);
+  public static final double kTHETA_STD_DEV_UNTRUSTED = 9999999; // gyro owns heading
   }
 
   private Constants() {}

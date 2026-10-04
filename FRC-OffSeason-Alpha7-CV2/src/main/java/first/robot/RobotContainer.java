@@ -21,8 +21,12 @@ import first.robot.subsystems.drive.GyroIOPigeon2;
 import first.robot.subsystems.drive.ModuleIO;
 import first.robot.subsystems.drive.ModuleIOSim;
 import first.robot.subsystems.drive.ModuleIOTalonFX;
+import first.robot.subsystems.vision.Vision;
+import first.robot.subsystems.vision.VisionIO;
+import first.robot.subsystems.vision.VisionIOLimelight;
 
 import static first.robot.Constants.OperatorConstants.*;
+import static first.robot.Constants.LimelightConstants.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -33,6 +37,7 @@ import static first.robot.Constants.OperatorConstants.*;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Vision vision;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -111,7 +116,18 @@ public class RobotContainer {
                   new ModuleIO() {},
                   new ModuleIO() {},
                   new ModuleIO() {});
+
+        
     }
+
+    vision = switch (Constants.getMode()) {
+        case REAL -> new Vision(new VisionIOLimelight(klimelightName, kROBOT_TO_CAMERA),
+            drive::addVisionMeasurement, drive::getRotation, drive::getYawRateRadPerSec);
+        default -> new Vision(new VisionIO() {},
+            drive::addVisionMeasurement, drive::getRotation, drive::getYawRateRadPerSec);
+    };
+
+    
 
     // Set up auto routines
     autoChooser = new LoggedNetworkChooser<>("/SmartDashboard/Auto Choices");
