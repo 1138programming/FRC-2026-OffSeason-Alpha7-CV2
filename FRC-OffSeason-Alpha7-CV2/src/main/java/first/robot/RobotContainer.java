@@ -14,13 +14,9 @@ import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 
 //subsystems
-import first.robot.subsystems.ActiveFloor;
-import first.robot.subsystems.Indexer;
+
 //commands
-import first.robot.commands.ActiveFloor.FloorInward;
-import first.robot.commands.ActiveFloor.FloorOutward;
-import first.robot.commands.IndexerCommands.IndexInCommand;
-import first.robot.commands.IndexerCommands.IndexOutCommand;
+
 //drive
 import first.robot.commands.DriveCommands;
 import first.robot.subsystems.drive.Drive;
@@ -41,10 +37,7 @@ import first.robot.subsystems.drive.ModuleIO;
 import first.robot.subsystems.drive.ModuleIOSim;
 import first.robot.subsystems.drive.ModuleIOTalonFX;
 
-import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_INWARD;
-import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_OUTWARD;
-import static first.robot.Constants.IndexerConstants.kINDEX_IN_POWER;
-import static first.robot.Constants.IndexerConstants.kINDEX_OUT_POWER;
+
 import static first.robot.Constants.OperatorConstants.*;
 
 /**
@@ -57,14 +50,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
 
-  public final ActiveFloor activeFloor;
-  public final Indexer indexer;
-
-  //commands
-  public final FloorInward floorInward;
-  public final FloorOutward floorOutward;
-  public final IndexInCommand indexIn;
-  public final IndexOutCommand indexOut;
+  // Commands
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -112,14 +98,10 @@ public class RobotContainer {
   public RobotContainer() {
 
     //subsystems
-    activeFloor = new ActiveFloor();
-    indexer = new Indexer();
+    
 
     //commands
-    floorInward = new FloorInward(activeFloor, kFLOOR_POWER_INWARD);
-    floorOutward = new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD);
-    indexIn = new IndexInCommand(indexer, kINDEX_IN_POWER);
-    indexOut = new IndexOutCommand(indexer, kINDEX_OUT_POWER); 
+    
 
     switch (Constants.getMode()) {
       case REAL ->
@@ -233,12 +215,10 @@ public class RobotContainer {
                 .ignoringDisable(true));
     
     //floor buttons
-    logitechButtonB.whileTrue(floorInward);
-    logitechButtonX.whileFalse(floorOutward);
+    
     
     //indexer buttons
-    logitechButtonY.whileTrue(indexIn);
-    logitechButtonA.whileTrue(indexOut);
+    
 
   }
 
