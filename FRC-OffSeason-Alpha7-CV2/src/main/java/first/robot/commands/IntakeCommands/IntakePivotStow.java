@@ -3,20 +3,23 @@ package first.robot.commands.IntakeCommands;
 import first.robot.subsystems.Intake;
 
 import org.wpilib.command2.Command;
+import org.wpilib.units.measure.Angle;
 
 import static first.robot.Constants.IntakeConstants.*;
 
 public class IntakePivotStow extends Command {
     private final Intake intake;
+    private double angle; 
 
     /**
      * Creates a new ExampleCommand.
      *
      * @param subsystem The subsystem used by this command.
      */
-    public IntakePivotStow(Intake intake) {
+    public IntakePivotStow(Intake intake, double angle) {
         
         this.intake = intake;
+        this.angle = angle;
         
         addRequirements(intake);
     }
@@ -28,7 +31,7 @@ public class IntakePivotStow extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        intake.intakePivotToPosition(kINTAKE_PIVOT_ZERO);
+        intake.intakePivotToPosition(angle);
     }
 
     // Called once the command ends or is interrupted.

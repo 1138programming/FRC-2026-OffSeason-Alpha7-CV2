@@ -8,15 +8,17 @@ import static first.robot.Constants.IntakeConstants.*;
 
 public class IntakePivotReverse extends Command {
     private final Intake intake;
+    private double power; 
 
     /**
      * Creates a new ExampleCommand.
      *
      * @param subsystem The subsystem used by this command.
      */
-    public IntakePivotReverse(Intake intake) {
+    public IntakePivotReverse(Intake intake, double power) {
         
         this.intake = intake;
+        this.power = power; 
         
         addRequirements(intake);
     }
@@ -28,7 +30,7 @@ public class IntakePivotReverse extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        intake.setIntakePivotPower(kINTAKE_PIVOT_STOW_POWER);
+        intake.setIntakePivotPower(power);
     }
 
     // Called once the command ends or is interrupted.

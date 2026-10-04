@@ -16,12 +16,19 @@ import org.wpilib.math.geometry.Rotation2d;
 //subsystems
 import first.robot.subsystems.ActiveFloor;
 import first.robot.subsystems.Indexer;
+import first.robot.subsystems.Intake;
 import first.robot.subsystems.Shooter;
 //commands
 import first.robot.commands.ActiveFloor.FloorInward;
 import first.robot.commands.ActiveFloor.FloorOutward;
 import first.robot.commands.IndexerCommands.IndexInCommand;
 import first.robot.commands.IndexerCommands.IndexOutCommand;
+import first.robot.commands.IntakeCommands.IntakePivotDeploy;
+import first.robot.commands.IntakeCommands.IntakePivotForward;
+import first.robot.commands.IntakeCommands.IntakePivotReverse;
+import first.robot.commands.IntakeCommands.IntakePivotStow;
+import first.robot.commands.IntakeCommands.IntakeRollerIn;
+import first.robot.commands.IntakeCommands.IntakeRollerOut;
 //drive
 import first.robot.commands.DriveCommands;
 import first.robot.commands.SpinShooterAtRPMCommand;
@@ -63,6 +70,7 @@ public class RobotContainer {
   public final ActiveFloor activeFloor;
   public final Indexer indexer;
   public final Shooter shooter;
+  public final Intake intake;
 
   //commands
   public final FloorInward floorInward;
@@ -70,6 +78,12 @@ public class RobotContainer {
   public final IndexInCommand indexIn;
   public final IndexOutCommand indexOut;
   public final SpinShooterAtRPMCommand spinShooterAtRPM;
+//   public final IntakePivotDeploy intakePivotDeploy;
+//   public final IntakePivotForward intakePivotForward;
+//   public final IntakePivotReverse intakePivotReverse;
+//   public final IntakePivotStow intakePivotstow;
+//   public final IntakeRollerIn intakeRollerIn;
+//   public final IntakeRollerOut intakeRollerOut;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -89,7 +103,13 @@ public class RobotContainer {
     logitechButtonLT,
     logitechButtonRT,
     logitechButtonBack,
-    logitechButtonStart;
+    logitechButtonStart,
+    logitechButtonDpadUp,
+    logitechButtonDpadDown,
+    logitechButtonDpadLeft,
+    logitechButtonDpadRight;
+
+
 
 
   public Trigger 
@@ -120,6 +140,7 @@ public class RobotContainer {
     activeFloor = new ActiveFloor();
     indexer = new Indexer();
     shooter = new Shooter();
+    intake = new Intake();
 
     //commands
     floorInward = new FloorInward(activeFloor, kFLOOR_POWER_INWARD);
@@ -181,6 +202,10 @@ public class RobotContainer {
     logitechButtonRT = controller.button(kLOGITECH_BUTTON_RT);
     logitechButtonBack = controller.button(kLOGITECH_BUTTON_BACK);
     logitechButtonStart = controller.button(kLOGITECH_BUTTON_START);
+    logitechButtonDpadUp = controller.button(kLOGITECH_BUTTON_DPAD_UP);
+    logitechButtonDpadDown = controller.button(kLOGITECH_BUTTON_DPAD_DOWN);
+    logitechButtonDpadLeft = controller.button(kLOGITECH_BUTTON_DPAD_LEFT);
+    logitechButtonDpadRight = controller.button(kLOGITECH_BUTTON_DPAD_RIGHT);
 
     compStreamDeck1 = compStreamDeck.button(1);
     compStreamDeck2 = compStreamDeck.button(2);
@@ -249,6 +274,19 @@ public class RobotContainer {
 
     //flywheel/shooter
     logitechButtonRT.whileTrue(spinShooterAtRPM);
+
+    logitechButtonDpadUp.whileTrue(
+        DriveCommands.runVelocity(drive, 1, 0, 0)
+    );
+        logitechButtonDpadDown.whileTrue(
+        DriveCommands.runVelocity(drive, -1, 0, 0)
+    );
+        logitechButtonDpadLeft.whileTrue(
+        DriveCommands.runVelocity(drive, 0, 1, 0)
+    );
+        logitechButtonDpadRight.whileTrue(
+        DriveCommands.runVelocity(drive, 0, -1, 0)
+    );
 
   }
 

@@ -8,15 +8,17 @@ import static first.robot.Constants.IntakeConstants.*;
 
 public class IntakePivotDeploy extends Command {
     private final Intake intake;
+    private double angle;
 
     /**
      * Creates a new ExampleCommand.
      *
      * @param subsystem The subsystem used by this command.
      */
-    public IntakePivotDeploy(Intake intake) {
+    public IntakePivotDeploy(Intake intake, double angle) {
         
         this.intake = intake;
+        this.angle = angle;
         
         addRequirements(intake);
     }
@@ -28,7 +30,7 @@ public class IntakePivotDeploy extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        intake.intakePivotToPosition(kINTAKE_PIVOT_DEPLOY_ANGLE);
+        intake.intakePivotToPosition(angle);
     }
 
     // Called once the command ends or is interrupted.

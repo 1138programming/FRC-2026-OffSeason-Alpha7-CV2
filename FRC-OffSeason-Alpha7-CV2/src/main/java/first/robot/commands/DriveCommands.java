@@ -272,6 +272,15 @@ public class DriveCommands {
                     })));
   }
 
+  public static Command runVelocity(Drive drive, double vx, double vy, double omega) {
+    return Commands.run(
+        () -> {
+          ChassisVelocities speeds =  new ChassisVelocities(vx, vy, omega);
+          drive.runVelocity(speeds);
+        },
+        drive);
+    }
+
   private static class WheelRadiusCharacterizationState {
     double[] positions = new double[4];
     Rotation2d lastAngle = new Rotation2d();
