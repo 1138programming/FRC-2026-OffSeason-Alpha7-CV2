@@ -241,17 +241,17 @@ public class RobotContainer {
             drive,
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            () -> controller.getRightX()));
 
     // Lock to 0 degrees while A is held
-    controller
-        .faceDown()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> Rotation2d.ZERO));
+    // controller
+    //     .faceDown()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> Rotation2d.ZERO));
 
     // Switch to X pattern when X is pressed
     controller.faceLeft().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -277,16 +277,16 @@ public class RobotContainer {
 
     double testVelocity = 0.5;
     logitechButtonDpadUp.whileTrue(
-        DriveCommands.runVelocity(drive, testVelocity, 0, 0)
-    );
-        logitechButtonDpadDown.whileTrue(
         DriveCommands.runVelocity(drive, -testVelocity, 0, 0)
     );
+        logitechButtonDpadDown.whileTrue(
+        DriveCommands.runVelocity(drive, testVelocity, 0, 0)
+    );
         logitechButtonDpadLeft.whileTrue(
-        DriveCommands.runVelocity(drive, 0, testVelocity, 0)
+        DriveCommands.runVelocity(drive, 0, -testVelocity, 0)
     );
         logitechButtonDpadRight.whileTrue(
-        DriveCommands.runVelocity(drive, 0, -testVelocity, 0)
+        DriveCommands.runVelocity(drive, 0, testVelocity, 0)
     );
 
   }
