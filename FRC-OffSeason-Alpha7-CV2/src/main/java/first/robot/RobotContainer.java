@@ -5,6 +5,7 @@
 package first.robot;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.CommandGamepad;
@@ -14,8 +15,10 @@ import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 
 //subsystems
+import first.robot.subsystems.Shooter;
 
 //commands
+import first.robot.commands.SpinShooterAtRPMCommand;
 
 //drive
 import first.robot.commands.DriveCommands;
@@ -39,6 +42,7 @@ import first.robot.subsystems.drive.ModuleIOTalonFX;
 
 
 import static first.robot.Constants.OperatorConstants.*;
+import static first.robot.Constants.ShooterConstants.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -49,6 +53,7 @@ import static first.robot.Constants.OperatorConstants.*;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Shooter shooter;
 
   // Commands
 
@@ -59,6 +64,8 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedNetworkChooser<Command> autoChooser;
+  private final LoggedNetworkNumber shooterTuningRPM =
+      new LoggedNetworkNumber("/Tuning/Shooter RPM", kShootRPM);
 
   public Trigger
     logitechButtonA,
@@ -98,7 +105,7 @@ public class RobotContainer {
   public RobotContainer() {
 
     //subsystems
-    
+    shooter = new Shooter();
 
     //commands
     
@@ -214,6 +221,18 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
     
+    //shooter buttons (hold to spin, release to stop)
+    // Right trigger: spin up to the preset shot RPM
+    controller.rightTrigger().whileTrue(new SpinShooterAtRPMCommand(shooter, kShootRPM));
+    // Left trigger: spin up to the RPM set on the dashboard at /Tuning/Shooter RPM
+    controller.leftTrigger().whileTrue(new SpinShooterAtRPMCommand(shooter, shooterTuningRPM));
+    // Right bumper: open-loop test power, for checking direction before trusting the gains
+    controller
+        .rightBumper()
+        .whileTrue(
+            Commands.startEnd(
+                () -> shooter.spinFlywheelMotors(kTestDutyCycle), shooter::stopFlywheelMotors, shooter));
+
     //floor buttons
     
     

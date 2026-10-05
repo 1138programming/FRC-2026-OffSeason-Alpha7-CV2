@@ -4,6 +4,8 @@
 
 package first.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import org.wpilib.command2.Command;
 
 import first.robot.subsystems.Shooter;
@@ -11,9 +13,14 @@ import first.robot.subsystems.Shooter;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class SpinShooterAtRPMCommand extends Command {
   Shooter shooter;
-  double RPM;
+  DoubleSupplier RPM;
   /** Creates a new SpinShooterAtRPMCommand. */
   public SpinShooterAtRPMCommand(Shooter shooter, double RPM) {
+    this(shooter, () -> RPM);
+  }
+
+  /** Spins at an RPM that is re-read every loop, e.g. from a dashboard number. */
+  public SpinShooterAtRPMCommand(Shooter shooter, DoubleSupplier RPM) {
     this.shooter = shooter;
     this.RPM = RPM;
     addRequirements(shooter);
@@ -26,7 +33,7 @@ public class SpinShooterAtRPMCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooter.spinFlywheelAtRPM(RPM);
+    shooter.spinFlywheelAtRPM(RPM.getAsDouble());
   }
 
   // Called once the command ends or is interrupted.
