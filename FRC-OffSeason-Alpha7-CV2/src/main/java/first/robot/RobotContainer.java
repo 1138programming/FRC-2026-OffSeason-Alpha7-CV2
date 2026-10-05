@@ -13,7 +13,14 @@ import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 
+import com.ctre.phoenix6.hardware.CANrange;
+
 import first.robot.commands.DriveCommands;
+import first.robot.commands.IndexerCommands.IndexInCommand;
+import first.robot.commands.IndexerCommands.IndexOutCommand;
+import first.robot.commands.IndexerCommands.IndexUntilBallIn;
+import first.robot.subsystems.CANRangeSensor;
+import first.robot.subsystems.Indexer;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
 import first.robot.subsystems.drive.GyroIO;
@@ -43,11 +50,19 @@ import static first.robot.Constants.OperatorConstants.*;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Indexer indexer;
+
+  private final CANRangeSensor indexerCANRange;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
   private final CommandGamepad controller = new CommandGamepad(0);
   private final CommandGamepad compStreamDeck = new CommandGamepad(1);
+
+  private final IndexInCommand indexInCommand;
+  private final IndexOutCommand indexOutCommand;
+  private final IndexUntilBallIn indexUntilBallInCommand;
+
 
   // Dashboard inputs
   private final LoggedNetworkChooser<Command> autoChooser;
@@ -88,6 +103,14 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    indexer = new Indexer();
+
+    indexerCANRange = new CANRangeSensor();
+
+    indexInCommand = new IndexInCommand(indexer);
+    indexOutCommand = new IndexOutCommand(indexer);
+    indexUntilBallInCommand = new IndexUntilBallIn(indexerCANRange, indexer);
 
 
     switch (Constants.getMode()) {
@@ -202,6 +225,10 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
+
+    controller.leftTrigger().whileTrue(indexInCommand);
+    controller.leftBumper().whileTrue(indexOutCommand);
+    controller.rightBumper().whileTrue(indexUntilBallInCommand);
     
   }
 
