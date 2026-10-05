@@ -14,6 +14,9 @@ import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 
 import first.robot.commands.DriveCommands;
+import first.robot.commands.ActiveFloor.FloorInward;
+import first.robot.commands.ActiveFloor.FloorOutward;
+import first.robot.subsystems.ActiveFloor;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
 import first.robot.subsystems.drive.GyroIO;
@@ -33,6 +36,10 @@ import static first.robot.Constants.OperatorConstants.*;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final ActiveFloor activeFloor;
+
+  private final FloorInward floorInwardCommand;
+  private final FloorOutward floorOutwardCommand;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -113,6 +120,11 @@ public class RobotContainer {
                   new ModuleIO() {});
     }
 
+    activeFloor = new ActiveFloor();
+
+    floorInwardCommand = new FloorInward(activeFloor);
+    floorOutwardCommand = new FloorOutward(activeFloor);
+
     // Set up auto routines
     autoChooser = new LoggedNetworkChooser<>("/SmartDashboard/Auto Choices");
     autoChooser.addDefault("None", Commands.none());
@@ -192,7 +204,9 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    
+    // Active floor test controls: hold RB to run inward, hold LB to run outward
+    logitechButtonRB.whileTrue(floorInwardCommand);
+    logitechButtonLB.whileTrue(floorOutwardCommand);
   }
 
   /**
