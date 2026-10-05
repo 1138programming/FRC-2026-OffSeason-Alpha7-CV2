@@ -103,6 +103,19 @@ public final class Constants {
     public static final double kIntakePivotZero = 0;
     public static final double kIntakePivotDeployAngle = 104.14;
 
+    // TODO: Replace 30.0 with the correct motor turns per output-shaft turn when provided.
+    public static final double kIntakePivotGearRatio = 30.0;
+    // Raw absolute encoder angle at stow, in degrees. Calibrate on the robot.
+    public static final double kIntakePivotEncoderZeroDegrees = 0.0;
+    // Encoder angle must increase in the same direction as the motor's positive position.
+    public static final boolean kIntakePivotEncoderInverted = false;
+
+    // Initial Motion Magic settings, in output-shaft degrees; tune on the robot.
+    public static final double kIntakePivotCruiseVelocity = 90.0; // degrees/second
+    public static final double kIntakePivotAcceleration = 180.0; // degrees/second^2
+    public static final double kIntakePivotJerk = 720.0; // degrees/second^3
+    public static final double kIntakePivotCurrentLimitAmps = 20.0;
+
     public static final int kIntakePivotID = 0;
     public static final int kIntakeRoller1ID = 0;
     public static final int kIntakeRoller2ID = 0;
@@ -113,9 +126,12 @@ public final class Constants {
     public static final double kIntakeRollerInPower = 0.5;
     public static final double kIntakeRollerOutPower = -0.5;
 
-    public static final double kIntakePIDp = 0.8;
+    // Initial onboard torque-current gains, NOT the previous duty-cycle PID gains.
+    // kP: amps/rotation; kI: amps/(rotation*second); kD: amps/(rotation/second).
+    // Tune on the robot after confirming the gear ratio and encoder calibration.
+    public static final double kIntakePIDp = 80.0;
     public static final double kIntakePIDi = 0.0;
-    public static final double kIntakePIDd = 0.0;
+    public static final double kIntakePIDd = 2.0;
   }
 
   private Constants() {}
