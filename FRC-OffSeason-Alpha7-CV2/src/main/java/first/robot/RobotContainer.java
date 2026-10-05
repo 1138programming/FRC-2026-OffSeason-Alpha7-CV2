@@ -5,6 +5,13 @@
 package first.robot;
 
 import first.robot.commands.DriveCommands;
+import first.robot.commands.IntakeCommands.IntakePivotDeploy;
+import first.robot.commands.IntakeCommands.IntakePivotForward;
+import first.robot.commands.IntakeCommands.IntakePivotReverse;
+import first.robot.commands.IntakeCommands.IntakePivotStow;
+import first.robot.commands.IntakeCommands.IntakeRollerIn;
+import first.robot.commands.IntakeCommands.IntakeRollerOut;
+import first.robot.subsystems.Intake;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
 import first.robot.subsystems.drive.GyroIO;
@@ -32,6 +39,7 @@ import org.wpilib.math.geometry.Rotation2d;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Intake intake;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -42,7 +50,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
+    intake = new Intake();
 
     switch (Constants.getMode()) {
       case REAL ->
@@ -133,7 +141,17 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    
+    // Intake rollers: hold right trigger to intake, left trigger to outtake
+    controller.rightTrigger().whileTrue(new IntakeRollerIn(intake));
+    controller.leftTrigger().whileTrue(new IntakeRollerOut(intake));
+
+    // Intake pivot: right bumper deploys, left bumper stows
+    controller.rightBumper().onTrue(new IntakePivotDeploy(intake));
+    controller.leftBumper().onTrue(new IntakePivotStow(intake));
+
+    // Manual pivot override: hold d-pad up/down
+    controller.dpadUp().whileTrue(new IntakePivotForward(intake));
+    controller.dpadDown().whileTrue(new IntakePivotReverse(intake));
   }
 
   /**

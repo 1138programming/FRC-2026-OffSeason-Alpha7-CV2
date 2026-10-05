@@ -40,6 +40,6 @@ public class IntakePivotStow extends Command {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return intake.getIntakeEncoder() <= kIntakePivotZero;
+        return intake.isPivotAtPosition(kIntakePivotZero);
     }
 }

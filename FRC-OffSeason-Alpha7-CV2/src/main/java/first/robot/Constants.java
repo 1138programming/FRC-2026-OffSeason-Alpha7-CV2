@@ -9,6 +9,7 @@ import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
 import org.wpilib.hardware.bus.CANPort;
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -99,9 +100,14 @@ public final class Constants {
     public static final CANPort kIntakeMotorCANPort = CANPort.CAN_S0;
     public static final CANBus kIntakeMotorCANBus = new CANBus(kIntakeMotorCANPort);
 
+    // REV Through Bore (absolute, duty cycle) on the pivot shaft - reads pivot angle in degrees
     public static final int kIntakePivotEncoderID = 0;
+    public static final double kIntakePivotEncoderOffset = 0; // raw encoder degrees when the pivot is stowed - measure on robot
+    public static final boolean kIntakePivotEncoderInverted = false; // flip so the angle increases toward deploy
+
     public static final double kIntakePivotZero = 0;
     public static final double kIntakePivotDeployAngle = 104.14;
+    public static final double kIntakePivotToleranceDegrees = 2.0; // how close counts as "there" for deploy/stow
 
     public static final int kIntakePivotID = 0;
     public static final int kIntakeRoller1ID = 0;
@@ -113,7 +119,13 @@ public final class Constants {
     public static final double kIntakeRollerInPower = 0.5;
     public static final double kIntakeRollerOutPower = -0.5;
 
-    public static final double kIntakePIDp = 0.8;
+    // Set to Opposed if roller 2 faces the opposite direction of roller 1
+    public static final MotorAlignmentValue kIntakeRoller2Alignment = MotorAlignmentValue.Aligned;
+
+    public static final double kIntakePivotGearRatio = 1.0; // motor rotations per pivot rotation - set to real ratio
+
+    // TalonFX Slot0 PositionVoltage gains, in volts per pivot rotation of error (starting points - tune on robot)
+    public static final double kIntakePIDp = 24.0;
     public static final double kIntakePIDi = 0.0;
     public static final double kIntakePIDd = 0.0;
   }
