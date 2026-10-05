@@ -97,7 +97,7 @@ public final class Constants {
 
   public static class IntakeConstants {
 
-    public static final CANPort kIntakeMotorCANPort = CANPort.CAN_S0;
+    public static final CANPort kIntakeMotorCANPort = CANPort.CAN_S1;
     public static final CANBus kIntakeMotorCANBus = new CANBus(kIntakeMotorCANPort);
 
     // REV Through Bore (absolute, duty cycle) on the pivot shaft - reads pivot angle in degrees
