@@ -180,6 +180,12 @@ public final class Constants {
     public static final MotorAlignmentValue kSHOOTER_MOTOR_3_ALIGNMENT = MotorAlignmentValue.Aligned;
   }
 
+  public static class CANRangeConstants{
+    public static final CANPort kS0 = CANPort.CAN_S0;
+    public static final int kCANRangeID = 0;
+    public static final double kMtoCM = 100.0;
+    public static final double kNoFuelDistance = 38; //cm
+  }
   private Constants() {}
 
 }

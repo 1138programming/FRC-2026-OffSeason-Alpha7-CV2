@@ -34,6 +34,14 @@ public class Indexer extends SubsystemBase {
     indexerRight.setControl(indexerRunRequest.withOutput(power));
   }
 
+  public void spinIndexerIn(){
+    spinIndexerMotors(kindexInPower);
+  }
+
+  public void spinIndexerOut(){
+    spinIndexerMotors(kindexOutPower);
+  }
+
   public void stopIndexerMotors(){
     indexerLeft.setControl(indexerStopRequest);
     indexerRight.setControl(indexerStopRequest);

@@ -13,16 +13,21 @@ import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 
+import com.ctre.phoenix6.hardware.CANrange;
+
+
 //subsystems
 import first.robot.subsystems.ActiveFloor;
 import first.robot.subsystems.Indexer;
 import first.robot.subsystems.Shooter;
 import first.robot.subsystems.ActiveFloor;
+import first.robot.subsystems.CANRangeSensor;
 //commands
 import first.robot.commands.ActiveFloor.FloorInward;
 import first.robot.commands.ActiveFloor.FloorOutward;
 import first.robot.commands.IndexerCommands.IndexInCommand;
 import first.robot.commands.IndexerCommands.IndexOutCommand;
+import first.robot.commands.IndexerCommands.IndexUntilBallIn;
 //drive
 import first.robot.commands.DriveCommands;
 import first.robot.commands.ActiveFloor.FloorInward;
@@ -62,7 +67,8 @@ import static first.robot.Constants.ShooterConstants.kFLYWHEEL_DEFAULT_RPM;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final ActiveFloor activeFloor;
+
+  private final CANRangeSensor indexerCANRange;
 
   private final FloorInward floorInwardCommand;
   private final FloorOutward floorOutwardCommand;
@@ -82,6 +88,11 @@ public class RobotContainer {
   // are A/B/X/Y on an Xbox pad.
   private final CommandGamepad controller = new CommandGamepad(0);
   private final CommandGamepad compStreamDeck = new CommandGamepad(1);
+
+  private final IndexInCommand indexInCommand;
+  private final IndexOutCommand indexOutCommand;
+  private final IndexUntilBallIn indexUntilBallInCommand;
+
 
   // Dashboard inputs
   private final LoggedNetworkChooser<Command> autoChooser;
@@ -123,6 +134,10 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
+
+    indexerCANRange = new CANRangeSensor();
+    
+
     //subsystems
     activeFloor = new ActiveFloor();
     indexer = new Indexer();
@@ -133,6 +148,7 @@ public class RobotContainer {
     floorOutward = new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD);
     indexIn = new IndexInCommand(indexer, kINDEX_IN_POWER);
     indexOut = new IndexOutCommand(indexer, kINDEX_OUT_POWER);
+    indexUntilBallInCommand = new IndexUntilBallIn(indexerCANRange, indexer);
     spinShooterAtRPM = new SpinShooterAtRPMCommand(shooter, kFLYWHEEL_DEFAULT_RPM); 
 
     switch (Constants.getMode()) {
@@ -250,6 +266,7 @@ public class RobotContainer {
                     () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.ZERO)),
                     drive)
                 .ignoringDisable(true));
+
     
     //floor buttons
     logitechButtonB.whileTrue(floorInward);
@@ -258,6 +275,7 @@ public class RobotContainer {
     //indexer buttons
     logitechButtonY.whileTrue(indexIn);
     logitechButtonA.whileTrue(indexOut);
+    controller.rightBumper().whileTrue(indexUntilBallInCommand);
 
     //flywheel/shooter
     logitechButtonRT.whileTrue(spinShooterAtRPM);
