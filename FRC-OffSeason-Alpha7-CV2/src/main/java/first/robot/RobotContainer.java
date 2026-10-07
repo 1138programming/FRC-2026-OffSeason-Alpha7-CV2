@@ -100,17 +100,17 @@ public class RobotContainer {
     controller.button(kLOGITECH_BUTTON_Y)
         .onTrue(Commands.runOnce(() -> fieldRelative = !fieldRelative));
 
-    // D-pad test commands remain robot-relative at 0.5 m/s.
+    // D-pad commands are robot-relative at 0.5 m/s, matching robot-relative joystick directions.
     // All buttons other than Y and the D-pad are intentionally unbound.
     double testVelocity = 0.5;
     controller.button(kLOGITECH_BUTTON_DPAD_UP)
-        .whileTrue(DriveCommands.runVelocity(drive, -testVelocity, 0, 0));
-    controller.button(kLOGITECH_BUTTON_DPAD_DOWN)
         .whileTrue(DriveCommands.runVelocity(drive, testVelocity, 0, 0));
+    controller.button(kLOGITECH_BUTTON_DPAD_DOWN)
+        .whileTrue(DriveCommands.runVelocity(drive, -testVelocity, 0, 0));
     controller.button(kLOGITECH_BUTTON_DPAD_LEFT)
-        .whileTrue(DriveCommands.runVelocity(drive, 0, -testVelocity, 0));
-    controller.button(kLOGITECH_BUTTON_DPAD_RIGHT)
         .whileTrue(DriveCommands.runVelocity(drive, 0, testVelocity, 0));
+    controller.button(kLOGITECH_BUTTON_DPAD_RIGHT)
+        .whileTrue(DriveCommands.runVelocity(drive, 0, -testVelocity, 0));
   }
 
   /**
