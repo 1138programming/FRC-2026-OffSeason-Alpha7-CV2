@@ -4,6 +4,31 @@
 
 package first.robot;
 
+import org.littletonrobotics.junction.networktables.LoggedNetworkChooser;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.CommandGamepad;
+import org.wpilib.command2.button.JoystickButton;
+import org.wpilib.command2.button.Trigger;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
+
+import com.ctre.phoenix6.hardware.CANrange;
+
+
+//subsystems
+import first.robot.subsystems.ActiveFloor;
+import first.robot.subsystems.Indexer;
+import first.robot.subsystems.Shooter;
+import first.robot.subsystems.ActiveFloor;
+import first.robot.subsystems.CANRangeSensor;
+//commands
+import first.robot.commands.ActiveFloor.FloorInward;
+import first.robot.commands.ActiveFloor.FloorOutward;
+import first.robot.commands.IndexerCommands.IndexInCommand;
+import first.robot.commands.IndexerCommands.IndexOutCommand;
+import first.robot.commands.IndexerCommands.IndexUntilBallIn;
+//drive
 import first.robot.commands.DriveCommands;
 import first.robot.commands.IntakeCommands.IntakePivotDeploy;
 import first.robot.commands.IntakeCommands.IntakePivotForward;
@@ -12,23 +37,33 @@ import first.robot.commands.IntakeCommands.IntakePivotStow;
 import first.robot.commands.IntakeCommands.IntakeRollerIn;
 import first.robot.commands.IntakeCommands.IntakeRollerOut;
 import first.robot.subsystems.Intake;
+import first.robot.commands.ActiveFloor.FloorInward;
+import first.robot.commands.ActiveFloor.FloorOutward;
+import first.robot.commands.SpinShooterAtRPMCommand;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
 import first.robot.subsystems.drive.GyroIO;
 import first.robot.subsystems.drive.GyroIOOnboardIMU;
-import first.robot.subsystems.drive.GyroIOPigeon2;
 import first.robot.subsystems.drive.ModuleIO;
 import first.robot.subsystems.drive.ModuleIOSim;
 import first.robot.subsystems.drive.ModuleIOTalonFX;
-
-import java.util.function.DoubleSupplier;
-
 import org.littletonrobotics.junction.networktables.LoggedNetworkChooser;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.CommandGamepad;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
+import first.robot.subsystems.drive.GyroIOPigeon2;
+import first.robot.subsystems.drive.ModuleIO;
+import first.robot.subsystems.drive.ModuleIOSim;
+import first.robot.subsystems.drive.ModuleIOTalonFX;
+
+import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_INWARD;
+import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_OUTWARD;
+import static first.robot.Constants.IndexerConstants.kINDEX_IN_POWER;
+import static first.robot.Constants.IndexerConstants.kINDEX_OUT_POWER;
+import static first.robot.Constants.OperatorConstants.*;
+import static first.robot.Constants.ShooterConstants.kFLYWHEEL_DEFAULT_RPM;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -41,23 +76,95 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake;
 
+  private final CANRangeSensor indexerCANRange;
+
+  private final FloorInward floorInwardCommand;
+  private final FloorOutward floorOutwardCommand;
+
+  public final ActiveFloor activeFloor;
+  public final Indexer indexer;
+  public final Shooter shooter;
+
+  //commands
+  public final FloorInward floorInward;
+  public final FloorOutward floorOutward;
+  public final IndexInCommand indexIn;
+  public final IndexOutCommand indexOut;
+  public final SpinShooterAtRPMCommand spinShooterAtRPM;
+
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
   private final CommandGamepad controller = new CommandGamepad(0);
+  private final CommandGamepad compStreamDeck = new CommandGamepad(1);
+
+  private final IndexInCommand indexInCommand;
+  private final IndexOutCommand indexOutCommand;
+  private final IndexUntilBallIn indexUntilBallInCommand;
+
 
   // Dashboard inputs
   private final LoggedNetworkChooser<Command> autoChooser;
 
+  public Trigger
+    logitechButtonA,
+    logitechButtonB,
+    logitechButtonY,
+    logitechButtonX,
+    logitechButtonLB,
+    logitechButtonRB,
+    logitechButtonLT,
+    logitechButtonRT,
+    logitechButtonBack,
+    logitechButtonStart;
+
+
+  public Trigger 
+    compStreamDeck1, 
+    compStreamDeck2, 
+    compStreamDeck3,
+    compStreamDeck4, 
+    compStreamDeck5, 
+    compStreamDeck6,
+    compStreamDeck7, 
+    compStreamDeck8, 
+    compStreamDeck9,
+    compStreamDeck10, 
+    compStreamDeck11, 
+    compStreamDeck12,
+    compStreamDeck13, 
+    compStreamDeck14, 
+    compStreamDeck15,
+    compStreamDeck16, 
+    compStreamDeck17, 
+    compStreamDeck18,
+    compStreamDeck19;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     intake = new Intake();
+
+    indexerCANRange = new CANRangeSensor();
+    
+
+    //subsystems
+    activeFloor = new ActiveFloor();
+    indexer = new Indexer();
+    shooter = new Shooter();
+
+    //commands
+    floorInward = new FloorInward(activeFloor, kFLOOR_POWER_INWARD);
+    floorOutward = new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD);
+    indexIn = new IndexInCommand(indexer, kINDEX_IN_POWER);
+    indexOut = new IndexOutCommand(indexer, kINDEX_OUT_POWER);
+    indexUntilBallInCommand = new IndexUntilBallIn(indexerCANRange, indexer);
+    spinShooterAtRPM = new SpinShooterAtRPMCommand(shooter, kFLYWHEEL_DEFAULT_RPM); 
 
     switch (Constants.getMode()) {
       case REAL ->
           // Real robot, instantiate hardware IO implementations
           drive =
               new Drive(
-                  new GyroIOOnboardIMU(),
+                  new GyroIOPigeon2(),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[0]),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[1]),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[2]),
@@ -85,6 +192,11 @@ public class RobotContainer {
                   new ModuleIO() {});
     }
 
+    activeFloor = new ActiveFloor();
+
+    floorInwardCommand = new FloorInward(activeFloor);
+    floorOutwardCommand = new FloorOutward(activeFloor);
+
     // Set up auto routines
     autoChooser = new LoggedNetworkChooser<>("/SmartDashboard/Auto Choices");
     autoChooser.addDefault("None", Commands.none());
@@ -94,6 +206,37 @@ public class RobotContainer {
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.add(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+
+    logitechButtonA = controller.button(kLOGITECH_BUTTON_A);
+    logitechButtonB = controller.button(kLOGITECH_BUTTON_B);
+    logitechButtonY = controller.button(kLOGITECH_BUTTON_Y);
+    logitechButtonX = controller.button(kLOGITECH_BUTTON_X);
+    logitechButtonLB = controller.button(kLOGITECH_BUTTON_LB);
+    logitechButtonRB = controller.button(kLOGITECH_BUTTON_RB);
+    logitechButtonLT = controller.button(kLOGITECH_BUTTON_LT);
+    logitechButtonRT = controller.button(kLOGITECH_BUTTON_RT);
+    logitechButtonBack = controller.button(kLOGITECH_BUTTON_BACK);
+    logitechButtonStart = controller.button(kLOGITECH_BUTTON_START);
+
+    compStreamDeck1 = compStreamDeck.button(1);
+    compStreamDeck2 = compStreamDeck.button(2);
+    compStreamDeck3 = compStreamDeck.button(3);
+    compStreamDeck4 = compStreamDeck.button(4);
+    compStreamDeck5 = compStreamDeck.button(5);
+    compStreamDeck6 = compStreamDeck.button(6);
+    compStreamDeck7 = compStreamDeck.button(7);
+    compStreamDeck8 = compStreamDeck.button(8);
+    compStreamDeck9 = compStreamDeck.button(9);
+    compStreamDeck10 = compStreamDeck.button(10);
+    compStreamDeck11 = compStreamDeck.button(11);
+    compStreamDeck12 = compStreamDeck.button(12);
+    compStreamDeck13 = compStreamDeck.button(13);
+    compStreamDeck14 = compStreamDeck.button(14);
+    compStreamDeck15 = compStreamDeck.button(15);
+    compStreamDeck16 = compStreamDeck.button(16);
+    compStreamDeck17 = compStreamDeck.button(17);
+    compStreamDeck18 = compStreamDeck.button(18);
+    compStreamDeck19 = compStreamDeck.button(19);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -110,14 +253,6 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
-    
-    // System.out.println("Hello New Drive");
-    // drive.setDefaultCommand(
-    //     DriveCommands.joystickDrive(
-    //         drive,
-    //         () -> 1,
-    //         () -> 0,
-    //         () -> 0));
 
     // Lock to 0 degrees while A is held
     controller
@@ -132,26 +267,27 @@ public class RobotContainer {
     // Switch to X pattern when X is pressed
     controller.faceLeft().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset the gyro heading to 0 degrees when B is pressed
-    controller
-        .faceRight()
+    // Reset the gyro heading to 0 degrees when 'Back' is pressed
+    logitechButtonBack
         .onTrue(
             Commands.runOnce(
                     () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.ZERO)),
                     drive)
                 .ignoringDisable(true));
 
-    // Intake rollers: hold right trigger to intake, left trigger to outtake
-    controller.rightTrigger().whileTrue(new IntakeRollerIn(intake));
-    controller.leftTrigger().whileTrue(new IntakeRollerOut(intake));
+    
+    //floor buttons
+    logitechButtonB.whileTrue(floorInward);
+    logitechButtonX.whileFalse(floorOutward);
+    
+    //indexer buttons
+    logitechButtonY.whileTrue(indexIn);
+    logitechButtonA.whileTrue(indexOut);
+    controller.rightBumper().whileTrue(indexUntilBallInCommand);
 
-    // Intake pivot: right bumper deploys, left bumper stows
-    controller.rightBumper().onTrue(new IntakePivotDeploy(intake));
-    controller.leftBumper().onTrue(new IntakePivotStow(intake));
+    //flywheel/shooter
+    logitechButtonRT.whileTrue(spinShooterAtRPM);
 
-    // Manual pivot override: hold d-pad up/down
-    controller.dpadUp().whileTrue(new IntakePivotForward(intake));
-    controller.dpadDown().whileTrue(new IntakePivotReverse(intake));
   }
 
   /**

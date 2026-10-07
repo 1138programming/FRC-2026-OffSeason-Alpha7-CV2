@@ -6,6 +6,7 @@ import org.wpilib.hardware.rotation.DutyCycleEncoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -15,6 +16,8 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
+
+import org.wpilib.math.controller.PIDController;
 import org.wpilib.units.measure.AngularVelocity;
 
 
@@ -38,9 +41,13 @@ public class Intake extends SubsystemBase
 
     public Intake ()
     {
-        IntakeRollerMotor1 = new TalonFX (kIntakeRoller1ID, kIntakeMotorCANBus);
-        IntakeRollerMotor2 = new TalonFX (kIntakeRoller2ID, kIntakeMotorCANBus);
-        IntakePivotMotor = new TalonFX (kIntakePivotID, kIntakeMotorCANBus);
+        IntakeRollerMotor1 = new TalonFX (kINTAKE_ROLLER_1_ID, new CANBus(kINTAKE_MOTOR_CAN_PORT));
+        IntakeRollerMotor2 = new TalonFX (kINTAKE_ROLLER_2_ID,  new CANBus(kINTAKE_MOTOR_CAN_PORT));
+        IntakePivotMotor = new TalonFX (kINTAKE_PIVOT_ID, new CANBus(kINTAKE_MOTOR_CAN_PORT));
+
+        IntakeRollerMotor2.setControl(new Follower(kINTAKE_ROLLER_1_ID, kINTAKE_ROLLER_2_ALIGNMENT));
+
+        configureIntakeMotors();
 
         IntakePivotEncoder = new DutyCycleEncoder(kIntakePivotEncoderID, 360.0, kIntakePivotEncoderOffset);
         IntakePivotEncoder.setInverted(kIntakePivotEncoderInverted);
@@ -60,11 +67,18 @@ public class Intake extends SubsystemBase
 
     private void configureIntakeMotors()
     {
+
         final TalonFXConfiguration rollerConfig = new TalonFXConfiguration()
             .withMotorOutput(
-            new MotorOutputConfigs()
-            .withInverted(InvertedValue.Clockwise_Positive)
-            .withNeutralMode(NeutralModeValue.Brake)
+                new MotorOutputConfigs()
+                .withInverted(InvertedValue.Clockwise_Positive)
+                .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withSlot0(
+                new Slot0Configs()
+                .withKP(kINTAKE_P)
+                .withKI(kINTAKE_I)
+                .withKD(kINTAKE_D)
             );
 
         final TalonFXConfiguration pivotConfig = new TalonFXConfiguration()
