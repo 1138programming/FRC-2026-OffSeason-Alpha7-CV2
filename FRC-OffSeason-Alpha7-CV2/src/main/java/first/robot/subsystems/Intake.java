@@ -1,7 +1,5 @@
 package first.robot.subsystems;
 
-import java.util.concurrent.CancellationException;
-
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.hardware.rotation.DutyCycleEncoder;
 
@@ -10,6 +8,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -23,8 +22,9 @@ import org.wpilib.units.measure.AngularVelocity;
 
 
 import static first.robot.Constants.IntakeConstants.*;
+import static first.robot.subsystems.drive.ModuleIOTalonFX.tryUntilOk;
 
-public class Intake extends SubsystemBase 
+public class Intake extends SubsystemBase
 {
     private TalonFX IntakeRollerMotor1;
     private TalonFX IntakeRollerMotor2;
@@ -33,12 +33,11 @@ public class Intake extends SubsystemBase
     private DutyCycleEncoder IntakePivotEncoder;
 
     private DutyCycleOut mintakePowerRequest;
-    private PositionVoltage mintakePositionRequest;
+    private PositionVoltage mpivotPositionRequest;
     private NeutralOut mstopRequest;
 
-    private PIDController intakePID;
-
     private boolean isDeployed;
+    private boolean isPivotSeeded;
 
     public Intake ()
     {
@@ -50,18 +49,23 @@ public class Intake extends SubsystemBase
 
         configureIntakeMotors();
 
-        IntakePivotEncoder = new DutyCycleEncoder(kINTAKE_PIVOT_ENCODER_ID, 360, kINTAKE_PIVOT_ZERO);
+        IntakePivotEncoder = new DutyCycleEncoder(kIntakePivotEncoderID, 360.0, kIntakePivotEncoderOffset);
+        IntakePivotEncoder.setInverted(kIntakePivotEncoderInverted);
+
+        configureIntakeMotors();
+
+        
+        IntakeRollerMotor2.setControl(new Follower(kIntakeRoller1ID, kIntakeRoller2Alignment));
 
         mintakePowerRequest = new DutyCycleOut(0);
-        mintakePositionRequest = new PositionVoltage(0).withSlot(0);
+        mpivotPositionRequest = new PositionVoltage(0).withSlot(0);
         mstopRequest = new NeutralOut();
 
-        intakePID = new PIDController(kINTAKE_P, kINTAKE_I, kINTAKE_D);
-
         isDeployed = false;
+        isPivotSeeded = false;
     }
 
-    public void configureIntakeMotors()
+    private void configureIntakeMotors()
     {
 
         final TalonFXConfiguration rollerConfig = new TalonFXConfiguration()
@@ -79,14 +83,24 @@ public class Intake extends SubsystemBase
 
         final TalonFXConfiguration pivotConfig = new TalonFXConfiguration()
             .withMotorOutput(
-                new MotorOutputConfigs()
-                .withInverted(InvertedValue.Clockwise_Positive)
-                .withNeutralMode(NeutralModeValue.Brake)
+            new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake)
+            )
+            .withFeedback(
+            new FeedbackConfigs()
+            .withSensorToMechanismRatio(kIntakePivotGearRatio)
+            )
+            .withSlot0(
+            new Slot0Configs()
+            .withKP(kIntakePIDp)
+            .withKI(kIntakePIDi)
+            .withKD(kIntakePIDd)
             );
 
-        IntakeRollerMotor1.getConfigurator().apply(rollerConfig);
-        IntakeRollerMotor2.getConfigurator().apply(rollerConfig);
-        IntakePivotMotor.getConfigurator().apply(pivotConfig);
+        tryUntilOk(5, () -> IntakeRollerMotor1.getConfigurator().apply(rollerConfig, 0.25));
+        tryUntilOk(5, () -> IntakeRollerMotor2.getConfigurator().apply(rollerConfig, 0.25));
+        tryUntilOk(5, () -> IntakePivotMotor.getConfigurator().apply(pivotConfig, 0.25));
     }
 
     public void stopIntakeRollers ()
@@ -114,9 +128,27 @@ public class Intake extends SubsystemBase
         isDeployed = deployed;
     }
 
+    /** Pivot angle in degrees from the Through Bore, wrapped to (-180, 180] so slightly past stow reads negative. */
     public double getIntakeEncoder()
     {
-        return IntakePivotEncoder.get();
+        double angle = IntakePivotEncoder.get();
+        return angle > 180.0 ? angle - 360.0 : angle;
+    }
+
+    /** True when the pivot is within tolerance of the target angle in degrees. */
+    public boolean isPivotAtPosition(double position)
+    {
+        return Math.abs(getIntakeEncoder() - position) <= kIntakePivotToleranceDegrees;
+    }
+
+    /** Copies the Through Bore angle into the TalonFX so its onboard PID uses the real pivot position. */
+    public void seedPivotFromEncoder()
+    {
+        if (IntakePivotEncoder.isConnected())
+        {
+            IntakePivotMotor.setPosition(degreesToRotations(getIntakeEncoder()));
+            isPivotSeeded = true;
+        }
     }
 
     public double getIntakeRollerVelocityRPM()
@@ -135,20 +167,29 @@ public class Intake extends SubsystemBase
         return isDeployed;
     }
 
+    /** Runs the TalonFX onboard position PID to the given pivot angle in degrees. */
     public void intakePivotToPosition (double position)
     {
-        double power = intakePID.calculate(getIntakeEncoder(), position);
-        setIntakePivotPower(power);
+        if (!isPivotSeeded)
+        {
+            stopIntakePivot();
+            return;
+        }
+
+        IntakePivotMotor.setControl(mpivotPositionRequest.withPosition(degreesToRotations(position)));
     }
 
-    public void resetIntakePIDPivot ()
+    private static double degreesToRotations(double degrees)
     {
-        intakePID.reset();
+        return degrees / 360.0;
     }
 
     @Override
     public void periodic()
     {
-
+        if (!isPivotSeeded)
+        {
+            seedPivotFromEncoder();
+        }
     }
 }

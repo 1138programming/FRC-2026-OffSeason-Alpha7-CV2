@@ -30,6 +30,13 @@ import first.robot.commands.IndexerCommands.IndexOutCommand;
 import first.robot.commands.IndexerCommands.IndexUntilBallIn;
 //drive
 import first.robot.commands.DriveCommands;
+import first.robot.commands.IntakeCommands.IntakePivotDeploy;
+import first.robot.commands.IntakeCommands.IntakePivotForward;
+import first.robot.commands.IntakeCommands.IntakePivotReverse;
+import first.robot.commands.IntakeCommands.IntakePivotStow;
+import first.robot.commands.IntakeCommands.IntakeRollerIn;
+import first.robot.commands.IntakeCommands.IntakeRollerOut;
+import first.robot.subsystems.Intake;
 import first.robot.commands.ActiveFloor.FloorInward;
 import first.robot.commands.ActiveFloor.FloorOutward;
 import first.robot.commands.SpinShooterAtRPMCommand;
@@ -67,6 +74,7 @@ import static first.robot.Constants.ShooterConstants.kFLYWHEEL_DEFAULT_RPM;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final Intake intake;
 
   private final CANRangeSensor indexerCANRange;
 
@@ -133,7 +141,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
+    intake = new Intake();
 
     indexerCANRange = new CANRangeSensor();
     
