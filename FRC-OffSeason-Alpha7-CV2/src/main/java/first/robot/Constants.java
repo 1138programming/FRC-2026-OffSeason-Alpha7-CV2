@@ -9,6 +9,8 @@ import org.wpilib.hardware.bus.CANPort;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
 
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
  * on SystemCore. Change the value of {@link #kSIMMODE} to switch between "sim" (physics sim) and
@@ -112,16 +114,19 @@ public final class Constants {
   private Constants() {}
 
   public static class IndexerConstants{
-    public static final CANPort kS0 = CANPort.CAN_S0;
-    public static final int kindexerLeftID = 0;
-    public static final int kindexerRightID = 0;
+    public static final CANPort kS0 = CANPort.CAN_S1;
+    public static final int kindexerLeftID = 23;
+    public static final int kindexerRightID = 21;
 
-    public static final double kindexInPower = 0.576;
-    public static final double kindexOutPower = -0.576;
+    public static final double kindexInPower = 0.4;
+    public static final double kindexOutPower = -0.4;
+
+    public static final MotorAlignmentValue kLeftMotorAlignment = MotorAlignmentValue.Opposed;
+
   }
 
   public static class CANRangeConstants{
-    public static final CANPort kS0 = CANPort.CAN_S0;
+    public static final String kS0 = "*";
     public static final int kCANRangeID = 0;
     public static final double kMtoCM = 100.0;
     public static final double kNoFuelDistance = 38; //cm

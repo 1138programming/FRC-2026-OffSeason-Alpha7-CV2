@@ -10,6 +10,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.controls.Follower;
 import static first.robot.Constants.IndexerConstants.*;
 
 public class Indexer extends SubsystemBase {
@@ -27,10 +28,11 @@ public class Indexer extends SubsystemBase {
     indexerRight = new TalonFX(kindexerRightID, canS0);
     indexerRunRequest = new DutyCycleOut(0.0);
     indexerStopRequest = new NeutralOut();
+    
+    indexerLeft.setControl(new Follower(kindexerRightID, kLeftMotorAlignment));
   }
 
   public void spinIndexerMotors(double power){
-    indexerLeft.setControl(indexerRunRequest.withOutput(power));
     indexerRight.setControl(indexerRunRequest.withOutput(power));
   }
 
@@ -43,11 +45,9 @@ public class Indexer extends SubsystemBase {
   }
 
   public void stopIndexerMotors(){
-    indexerLeft.setControl(indexerStopRequest);
     indexerRight.setControl(indexerStopRequest);
   }
 
-  
 
 
 }
