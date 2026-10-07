@@ -62,6 +62,20 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   }
 
   public enum RobotType {
@@ -116,12 +130,12 @@ public final class Constants {
   private Constants() {}
 
   public static class ShooterConstants{
-    public static final CANPort kshooterMotorCANbus = CANPort.CAN_S0;
+    public static final CANPort kshooterMotorCANbus = CANPort.CAN_S1;
 
     // TODO: set real CAN IDs. While they match, followers are skipped and an alert is raised.
-    public static final int kshooterMotor1ID = 0; // leader
-    public static final int kshooterMotor2ID = 0;
-    public static final int kshooterMotor3ID = 0;
+    public static final int kshooterMotor1ID = 22; // leader
+    public static final int kshooterMotor2ID = 20;
+    public static final int kshooterMotor3ID = 24;
 
     public static final double kFlywheelGearRatio = 2.0 / 3.0; // flywheel rotations per motor rotation
 
