@@ -87,12 +87,12 @@ public class RobotContainer {
   /** Maps driver inputs to commands. */
   private void configureButtonBindings() {
     // Default command, field-relative drive with the red-alliance perspective flipped 180 degrees.
-    // Forward on the stick maps to +X and left maps to +Y before the alliance adjustment.
+    // Forward on the stick maps to -X and left maps to -Y before the alliance adjustment.
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
+            () -> controller.getLeftY(),
+            () -> controller.getLeftX(),
             () -> controller.getRightX(),
             () -> fieldRelative));
 
@@ -104,13 +104,13 @@ public class RobotContainer {
     // All buttons other than Y and the D-pad are intentionally unbound.
     double testVelocity = 0.5;
     controller.button(kLOGITECH_BUTTON_DPAD_UP)
-        .whileTrue(DriveCommands.runVelocity(drive, testVelocity, 0, 0));
-    controller.button(kLOGITECH_BUTTON_DPAD_DOWN)
         .whileTrue(DriveCommands.runVelocity(drive, -testVelocity, 0, 0));
+    controller.button(kLOGITECH_BUTTON_DPAD_DOWN)
+        .whileTrue(DriveCommands.runVelocity(drive, testVelocity, 0, 0));
     controller.button(kLOGITECH_BUTTON_DPAD_LEFT)
-        .whileTrue(DriveCommands.runVelocity(drive, 0, testVelocity, 0));
-    controller.button(kLOGITECH_BUTTON_DPAD_RIGHT)
         .whileTrue(DriveCommands.runVelocity(drive, 0, -testVelocity, 0));
+    controller.button(kLOGITECH_BUTTON_DPAD_RIGHT)
+        .whileTrue(DriveCommands.runVelocity(drive, 0, testVelocity, 0));
   }
 
   /**
