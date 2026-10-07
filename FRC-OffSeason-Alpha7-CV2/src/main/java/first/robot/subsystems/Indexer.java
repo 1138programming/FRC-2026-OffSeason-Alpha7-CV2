@@ -23,8 +23,8 @@ public class Indexer extends SubsystemBase {
   /** Creates a new Indexer. */
   public Indexer() {
     canS0 = new CANBus(kS0);
-    indexerLeft = new TalonFX(kindexerLeftID, canS0);
-    indexerRight = new TalonFX(kindexerRightID, canS0);
+    indexerLeft = new TalonFX(kINDEXER_LEFT_ID, canS0);
+    indexerRight = new TalonFX(kINDEXER_RIGHT_ID, canS0);
     indexerRunRequest = new DutyCycleOut(0.0);
     indexerStopRequest = new NeutralOut();
   }

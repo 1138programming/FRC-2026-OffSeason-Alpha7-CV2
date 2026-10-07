@@ -15,12 +15,24 @@ import org.wpilib.math.geometry.Rotation2d;
 
 import com.ctre.phoenix6.hardware.CANrange;
 
-import first.robot.commands.DriveCommands;
+
+//subsystems
+import first.robot.subsystems.ActiveFloor;
+import first.robot.subsystems.Indexer;
+import first.robot.subsystems.Shooter;
+import first.robot.subsystems.ActiveFloor;
+import first.robot.subsystems.CANRangeSensor;
+//commands
+import first.robot.commands.ActiveFloor.FloorInward;
+import first.robot.commands.ActiveFloor.FloorOutward;
 import first.robot.commands.IndexerCommands.IndexInCommand;
 import first.robot.commands.IndexerCommands.IndexOutCommand;
 import first.robot.commands.IndexerCommands.IndexUntilBallIn;
-import first.robot.subsystems.CANRangeSensor;
-import first.robot.subsystems.Indexer;
+//drive
+import first.robot.commands.DriveCommands;
+import first.robot.commands.ActiveFloor.FloorInward;
+import first.robot.commands.ActiveFloor.FloorOutward;
+import first.robot.commands.SpinShooterAtRPMCommand;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
 import first.robot.subsystems.drive.GyroIO;
@@ -39,7 +51,12 @@ import first.robot.subsystems.drive.ModuleIO;
 import first.robot.subsystems.drive.ModuleIOSim;
 import first.robot.subsystems.drive.ModuleIOTalonFX;
 
+import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_INWARD;
+import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_OUTWARD;
+import static first.robot.Constants.IndexerConstants.kINDEX_IN_POWER;
+import static first.robot.Constants.IndexerConstants.kINDEX_OUT_POWER;
 import static first.robot.Constants.OperatorConstants.*;
+import static first.robot.Constants.ShooterConstants.kFLYWHEEL_DEFAULT_RPM;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -50,9 +67,22 @@ import static first.robot.Constants.OperatorConstants.*;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Indexer indexer;
 
   private final CANRangeSensor indexerCANRange;
+
+  private final FloorInward floorInwardCommand;
+  private final FloorOutward floorOutwardCommand;
+
+  public final ActiveFloor activeFloor;
+  public final Indexer indexer;
+  public final Shooter shooter;
+
+  //commands
+  public final FloorInward floorInward;
+  public final FloorOutward floorOutward;
+  public final IndexInCommand indexIn;
+  public final IndexOutCommand indexOut;
+  public final SpinShooterAtRPMCommand spinShooterAtRPM;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -104,14 +134,22 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
-    indexer = new Indexer();
 
     indexerCANRange = new CANRangeSensor();
+    
 
-    indexInCommand = new IndexInCommand(indexer);
-    indexOutCommand = new IndexOutCommand(indexer);
+    //subsystems
+    activeFloor = new ActiveFloor();
+    indexer = new Indexer();
+    shooter = new Shooter();
+
+    //commands
+    floorInward = new FloorInward(activeFloor, kFLOOR_POWER_INWARD);
+    floorOutward = new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD);
+    indexIn = new IndexInCommand(indexer, kINDEX_IN_POWER);
+    indexOut = new IndexOutCommand(indexer, kINDEX_OUT_POWER);
     indexUntilBallInCommand = new IndexUntilBallIn(indexerCANRange, indexer);
-
+    spinShooterAtRPM = new SpinShooterAtRPMCommand(shooter, kFLYWHEEL_DEFAULT_RPM); 
 
     switch (Constants.getMode()) {
       case REAL ->
@@ -145,6 +183,11 @@ public class RobotContainer {
                   new ModuleIO() {},
                   new ModuleIO() {});
     }
+
+    activeFloor = new ActiveFloor();
+
+    floorInwardCommand = new FloorInward(activeFloor);
+    floorOutwardCommand = new FloorOutward(activeFloor);
 
     // Set up auto routines
     autoChooser = new LoggedNetworkChooser<>("/SmartDashboard/Auto Choices");
@@ -216,20 +259,27 @@ public class RobotContainer {
     // Switch to X pattern when X is pressed
     controller.faceLeft().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset the gyro heading to 0 degrees when B is pressed
-    controller
-        .faceRight()
+    // Reset the gyro heading to 0 degrees when 'Back' is pressed
+    logitechButtonBack
         .onTrue(
             Commands.runOnce(
                     () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.ZERO)),
                     drive)
                 .ignoringDisable(true));
 
-
-    controller.leftTrigger().whileTrue(indexInCommand);
-    controller.leftBumper().whileTrue(indexOutCommand);
-    controller.rightBumper().whileTrue(indexUntilBallInCommand);
     
+    //floor buttons
+    logitechButtonB.whileTrue(floorInward);
+    logitechButtonX.whileFalse(floorOutward);
+    
+    //indexer buttons
+    logitechButtonY.whileTrue(indexIn);
+    logitechButtonA.whileTrue(indexOut);
+    controller.rightBumper().whileTrue(indexUntilBallInCommand);
+
+    //flywheel/shooter
+    logitechButtonRT.whileTrue(spinShooterAtRPM);
+
   }
 
   /**

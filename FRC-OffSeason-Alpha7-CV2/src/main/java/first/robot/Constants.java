@@ -4,10 +4,13 @@
 
 package first.robot;
 
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.hardware.bus.CANPort;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
+import org.wpilib.hardware.bus.CANPort;
+import com.ctre.phoenix6.CANBus;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -93,6 +96,40 @@ public final class Constants {
     }
   }
 
+  // ------- Subsystem constants ----- //
+  public static class IntakeConstants {
+
+    public static final CANPort kINTAKE_MOTOR_CAN_PORT = CANPort.CAN_S0;
+    public static final CANBus kINTAKE_MOTOR_CANBUS = new CANBus(kINTAKE_MOTOR_CAN_PORT);
+
+    public static final int kINTAKE_PIVOT_ENCODER_ID = 0;
+    public static final double kINTAKE_PIVOT_ZERO = 0;
+    public static final double kINTAKE_PIVOT_DEPLOY_ANGLE = 104.14;
+
+    public static final int kINTAKE_PIVOT_ID = 0;
+    public static final int kINTAKE_ROLLER_1_ID = 0;
+    public static final int kINTAKE_ROLLER_2_ID = 0;
+
+    public static final MotorAlignmentValue kINTAKE_ROLLER_2_ALIGNMENT = MotorAlignmentValue.Aligned;
+
+    public static final double kINTAKE_PIVOT_DEPLOY_POWER = 0.5;
+    public static final double kINTAKE_PIVOT_STOW_POWER = -0.5;
+
+    public static final double kINTAKE_ROLLER_IN_POWER = 0.5;
+    public static final double kINTAKE_ROLLER_OUT_POWER = -0.5;
+
+    public static final double kINTAKE_P = 0.8;
+    public static final double kINTAKE_I = 0.0;
+    public static final double kINTAKE_D = 0.0;
+  }
+  public static class ActiveFloorConstants {
+    public static final int kFLOOR_ROLLER_MOTOR_ID = 9;
+
+    public static final double kFLOOR_POWER_INWARD = 0.5;
+    public static final double kFLOOR_POWER_OUTWARD = -0.5;
+  }
+
+   
   public static class OperatorConstants {
     //Logitech Button Constants
     public static final int kLOGITECH_BUTTON_A = 0;
@@ -105,19 +142,42 @@ public final class Constants {
     public static final int kLOGITECH_BUTTON_RT = 16;
     public static final int kLOGITECH_BUTTON_BACK = 4;
     public static final int kLOGITECH_BUTTON_START = 6;
-
-
   }
-
-  private Constants() {}
-
   public static class IndexerConstants{
     public static final CANPort kS0 = CANPort.CAN_S0;
-    public static final int kindexerLeftID = 0;
-    public static final int kindexerRightID = 0;
+    public static final int kINDEXER_LEFT_ID = 0;
+    public static final int kINDEXER_RIGHT_ID = 0;
 
-    public static final double kindexInPower = 0.576;
-    public static final double kindexOutPower = -0.576;
+    public static final double kINDEX_IN_POWER = 0.576;
+    public static final double kINDEX_OUT_POWER = -0.576;
+  }
+  public static class ShooterConstants{
+    public static final CANPort kSHOOTER_MOTOR_CANBUS = CANPort.CAN_S0;
+
+    public static final int kSHOOTER_MOTOR_1_ID = 0;
+    public static final int kSHOOTER_MOTOR_2_ID = 0;
+    public static final int kSHOOTER_MOTOR_3_ID = 0;
+
+    public static final double kFLYWHEEL_GEAR_RATIO = 2.0 / 3.0; // flywheel rotations per motor rotation
+
+    // VelocityVoltage gains, in volts per flywheel rotation per second (starting points - tune on robot)
+    public static final double kS = 0.15;
+    public static final double kV = 0.18;
+    public static final double kP = 0.1;
+    public static final double kI = 0;
+    public static final double kD = 0;
+
+    //current limits -> shooter draws a lot of power
+    public static final double kSHOOTER_STATOR_CURRENT_LIMIT = 100;
+    public static final double kSHOOTER_SUPPLY_CURRENT_LIMIT = 60;
+
+    public static final double kFLYWHEEL_TOLERANCE_RPM = 50;
+
+    public static final double kFLYWHEEL_DEFAULT_RPM = 40;
+
+    // Set to Opposed if a follower motor faces the opposite direction of motor 1
+    public static final MotorAlignmentValue kSHOOTER_MOTOR_2_ALIGNMENT = MotorAlignmentValue.Aligned;
+    public static final MotorAlignmentValue kSHOOTER_MOTOR_3_ALIGNMENT = MotorAlignmentValue.Aligned;
   }
 
   public static class CANRangeConstants{
@@ -126,4 +186,6 @@ public final class Constants {
     public static final double kMtoCM = 100.0;
     public static final double kNoFuelDistance = 38; //cm
   }
+  private Constants() {}
+
 }
