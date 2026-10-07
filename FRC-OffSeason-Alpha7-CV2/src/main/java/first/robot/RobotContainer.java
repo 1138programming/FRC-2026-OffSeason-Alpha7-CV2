@@ -63,7 +63,7 @@ import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_OUTWARD;
 import static first.robot.Constants.IndexerConstants.kINDEX_IN_POWER;
 import static first.robot.Constants.IndexerConstants.kINDEX_OUT_POWER;
 import static first.robot.Constants.OperatorConstants.*;
-import static first.robot.Constants.ShooterConstants.kFLYWHEEL_DEFAULT_RPM;
+import static first.robot.Constants.ShooterConstants.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -78,9 +78,6 @@ public class RobotContainer {
 
   private final CANRangeSensor indexerCANRange;
 
-  private final FloorInward floorInwardCommand;
-  private final FloorOutward floorOutwardCommand;
-
   public final ActiveFloor activeFloor;
   public final Indexer indexer;
   public final Shooter shooter;
@@ -90,6 +87,7 @@ public class RobotContainer {
   public final FloorOutward floorOutward;
   public final IndexInCommand indexIn;
   public final IndexOutCommand indexOut;
+  private final IndexUntilBallIn indexUntilBallInCommand;
   public final SpinShooterAtRPMCommand spinShooterAtRPM;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
@@ -97,9 +95,6 @@ public class RobotContainer {
   private final CommandGamepad controller = new CommandGamepad(0);
   private final CommandGamepad compStreamDeck = new CommandGamepad(1);
 
-  private final IndexInCommand indexInCommand;
-  private final IndexOutCommand indexOutCommand;
-  private final IndexUntilBallIn indexUntilBallInCommand;
 
 
   // Dashboard inputs
@@ -191,11 +186,6 @@ public class RobotContainer {
                   new ModuleIO() {},
                   new ModuleIO() {});
     }
-
-    activeFloor = new ActiveFloor();
-
-    floorInwardCommand = new FloorInward(activeFloor);
-    floorOutwardCommand = new FloorOutward(activeFloor);
 
     // Set up auto routines
     autoChooser = new LoggedNetworkChooser<>("/SmartDashboard/Auto Choices");

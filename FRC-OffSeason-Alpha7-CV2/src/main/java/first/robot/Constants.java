@@ -112,6 +112,8 @@ public final class Constants {
     public static final double kIntakePivotDeployAngle = 104.14;
     public static final double kIntakePivotToleranceDegrees = 2.0; // how close counts as "there" for deploy/stow
 
+    public static final double kINTAKE_PIVOT_GEAR_RATIO = 1.0;
+
     public static final int kINTAKE_PIVOT_ID = 0;
     public static final int kINTAKE_ROLLER_1_ID = 0;
     public static final int kINTAKE_ROLLER_2_ID = 0;
@@ -179,9 +181,13 @@ public final class Constants {
     public static final double kSHOOTER_SUPPLY_CURRENT_LIMIT = 60;
 
     // Set to Opposed if roller 2 faces the opposite direction of roller 1
-    public static final MotorAlignmentValue kIntakeRoller2Alignment = MotorAlignmentValue.Aligned;
+    public static final MotorAlignmentValue kSHOOTER_MOTOR_2_ALIGNMENT = MotorAlignmentValue.Opposed;
+    public static final MotorAlignmentValue kSHOOTER_MOTOR_3_ALIGNMENT = MotorAlignmentValue.Opposed;
 
-    public static final double kIntakePivotGearRatio = 1.0; // motor rotations per pivot rotation - set to real ratio
+     // motor rotations per pivot rotation - set to real ratio
+
+    public static final double kFLYWHEEL_TOLERANCE_RPM = 50;
+    public static final double kFLYWHEEL_DEFAULT_RPM = 3000;
 
     // TalonFX Slot0 PositionVoltage gains, in volts per pivot rotation of error (starting points - tune on robot)
     public static final double kIntakePIDp = 24.0;

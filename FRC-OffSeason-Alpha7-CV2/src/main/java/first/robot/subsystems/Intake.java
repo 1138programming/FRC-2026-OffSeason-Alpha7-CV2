@@ -41,9 +41,9 @@ public class Intake extends SubsystemBase
 
     public Intake ()
     {
-        IntakeRollerMotor1 = new TalonFX (kINTAKE_ROLLER_1_ID, new CANBus(kINTAKE_MOTOR_CAN_PORT));
-        IntakeRollerMotor2 = new TalonFX (kINTAKE_ROLLER_2_ID,  new CANBus(kINTAKE_MOTOR_CAN_PORT));
-        IntakePivotMotor = new TalonFX (kINTAKE_PIVOT_ID, new CANBus(kINTAKE_MOTOR_CAN_PORT));
+        IntakeRollerMotor1 = new TalonFX (kINTAKE_ROLLER_1_ID, new CANBus(kIntakeMotorCANPort));
+        IntakeRollerMotor2 = new TalonFX (kINTAKE_ROLLER_2_ID,  new CANBus(kIntakeMotorCANPort));
+        IntakePivotMotor = new TalonFX (kINTAKE_PIVOT_ID, new CANBus(kIntakeMotorCANPort));
 
         IntakeRollerMotor2.setControl(new Follower(kINTAKE_ROLLER_1_ID, kINTAKE_ROLLER_2_ALIGNMENT));
 
@@ -55,7 +55,7 @@ public class Intake extends SubsystemBase
         configureIntakeMotors();
 
         
-        IntakeRollerMotor2.setControl(new Follower(kIntakeRoller1ID, kIntakeRoller2Alignment));
+        IntakeRollerMotor2.setControl(new Follower(kINTAKE_ROLLER_1_ID, kINTAKE_ROLLER_2_ALIGNMENT));
 
         mintakePowerRequest = new DutyCycleOut(0);
         mpivotPositionRequest = new PositionVoltage(0).withSlot(0);
@@ -89,13 +89,13 @@ public class Intake extends SubsystemBase
             )
             .withFeedback(
             new FeedbackConfigs()
-            .withSensorToMechanismRatio(kIntakePivotGearRatio)
+            .withSensorToMechanismRatio(kINTAKE_PIVOT_GEAR_RATIO)
             )
             .withSlot0(
             new Slot0Configs()
-            .withKP(kIntakePIDp)
-            .withKI(kIntakePIDi)
-            .withKD(kIntakePIDd)
+            .withKP(kINTAKE_P)
+            .withKI(kINTAKE_I)
+            .withKD(kINTAKE_D)
             );
 
         tryUntilOk(5, () -> IntakeRollerMotor1.getConfigurator().apply(rollerConfig, 0.25));
