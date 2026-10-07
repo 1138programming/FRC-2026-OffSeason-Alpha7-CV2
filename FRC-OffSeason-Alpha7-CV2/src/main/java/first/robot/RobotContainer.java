@@ -17,6 +17,7 @@ import org.wpilib.math.geometry.Rotation2d;
 import first.robot.subsystems.ActiveFloor;
 import first.robot.subsystems.Indexer;
 import first.robot.subsystems.Shooter;
+import first.robot.subsystems.ActiveFloor;
 //commands
 import first.robot.commands.ActiveFloor.FloorInward;
 import first.robot.commands.ActiveFloor.FloorOutward;
@@ -24,6 +25,8 @@ import first.robot.commands.IndexerCommands.IndexInCommand;
 import first.robot.commands.IndexerCommands.IndexOutCommand;
 //drive
 import first.robot.commands.DriveCommands;
+import first.robot.commands.ActiveFloor.FloorInward;
+import first.robot.commands.ActiveFloor.FloorOutward;
 import first.robot.commands.SpinShooterAtRPMCommand;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
@@ -59,6 +62,10 @@ import static first.robot.Constants.ShooterConstants.kFLYWHEEL_DEFAULT_RPM;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
+  private final ActiveFloor activeFloor;
+
+  private final FloorInward floorInwardCommand;
+  private final FloorOutward floorOutwardCommand;
 
   public final ActiveFloor activeFloor;
   public final Indexer indexer;
@@ -160,6 +167,11 @@ public class RobotContainer {
                   new ModuleIO() {},
                   new ModuleIO() {});
     }
+
+    activeFloor = new ActiveFloor();
+
+    floorInwardCommand = new FloorInward(activeFloor);
+    floorOutwardCommand = new FloorOutward(activeFloor);
 
     // Set up auto routines
     autoChooser = new LoggedNetworkChooser<>("/SmartDashboard/Auto Choices");
