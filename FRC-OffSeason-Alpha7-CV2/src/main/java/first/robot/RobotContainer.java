@@ -13,19 +13,45 @@ import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
 
+//subsystems
+import first.robot.subsystems.ActiveFloor;
+import first.robot.subsystems.Indexer;
+import first.robot.subsystems.Shooter;
+import first.robot.subsystems.ActiveFloor;
+//commands
+import first.robot.commands.ActiveFloor.FloorInward;
+import first.robot.commands.ActiveFloor.FloorOutward;
+import first.robot.commands.IndexerCommands.IndexInCommand;
+import first.robot.commands.IndexerCommands.IndexOutCommand;
+//drive
 import first.robot.commands.DriveCommands;
 import first.robot.commands.ActiveFloor.FloorInward;
 import first.robot.commands.ActiveFloor.FloorOutward;
-import first.robot.subsystems.ActiveFloor;
+import first.robot.commands.SpinShooterAtRPMCommand;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
 import first.robot.subsystems.drive.GyroIO;
+import first.robot.subsystems.drive.GyroIOOnboardIMU;
+import first.robot.subsystems.drive.ModuleIO;
+import first.robot.subsystems.drive.ModuleIOSim;
+import first.robot.subsystems.drive.ModuleIOTalonFX;
+import org.littletonrobotics.junction.networktables.LoggedNetworkChooser;
+import org.wpilib.command2.Command;
+import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.CommandGamepad;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
 import first.robot.subsystems.drive.GyroIOPigeon2;
 import first.robot.subsystems.drive.ModuleIO;
 import first.robot.subsystems.drive.ModuleIOSim;
 import first.robot.subsystems.drive.ModuleIOTalonFX;
 
+import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_INWARD;
+import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_OUTWARD;
+import static first.robot.Constants.IndexerConstants.kINDEX_IN_POWER;
+import static first.robot.Constants.IndexerConstants.kINDEX_OUT_POWER;
 import static first.robot.Constants.OperatorConstants.*;
+import static first.robot.Constants.ShooterConstants.kFLYWHEEL_DEFAULT_RPM;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -40,6 +66,17 @@ public class RobotContainer {
 
   private final FloorInward floorInwardCommand;
   private final FloorOutward floorOutwardCommand;
+
+  public final ActiveFloor activeFloor;
+  public final Indexer indexer;
+  public final Shooter shooter;
+
+  //commands
+  public final FloorInward floorInward;
+  public final FloorOutward floorOutward;
+  public final IndexInCommand indexIn;
+  public final IndexOutCommand indexOut;
+  public final SpinShooterAtRPMCommand spinShooterAtRPM;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -86,6 +123,17 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
+    //subsystems
+    activeFloor = new ActiveFloor();
+    indexer = new Indexer();
+    shooter = new Shooter();
+
+    //commands
+    floorInward = new FloorInward(activeFloor, kFLOOR_POWER_INWARD);
+    floorOutward = new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD);
+    indexIn = new IndexInCommand(indexer, kINDEX_IN_POWER);
+    indexOut = new IndexOutCommand(indexer, kINDEX_OUT_POWER);
+    spinShooterAtRPM = new SpinShooterAtRPMCommand(shooter, kFLYWHEEL_DEFAULT_RPM); 
 
     switch (Constants.getMode()) {
       case REAL ->
@@ -195,18 +243,25 @@ public class RobotContainer {
     // Switch to X pattern when X is pressed
     controller.faceLeft().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset the gyro heading to 0 degrees when B is pressed
-    controller
-        .faceRight()
+    // Reset the gyro heading to 0 degrees when 'Back' is pressed
+    logitechButtonBack
         .onTrue(
             Commands.runOnce(
                     () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.ZERO)),
                     drive)
                 .ignoringDisable(true));
+    
+    //floor buttons
+    logitechButtonB.whileTrue(floorInward);
+    logitechButtonX.whileFalse(floorOutward);
+    
+    //indexer buttons
+    logitechButtonY.whileTrue(indexIn);
+    logitechButtonA.whileTrue(indexOut);
 
-    // Active floor test controls: hold RB to run inward, hold LB to run outward
-    logitechButtonRB.whileTrue(floorInwardCommand);
-    logitechButtonLB.whileTrue(floorOutwardCommand);
+    //flywheel/shooter
+    logitechButtonRT.whileTrue(spinShooterAtRPM);
+
   }
 
   /**
