@@ -9,6 +9,7 @@ import org.wpilib.hardware.bus.CANPort;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
@@ -97,6 +98,45 @@ public final class Constants {
   }
 
   // ------- Subsystem constants ----- //
+  public static class IntakeConstants {
+
+    public static final CANPort kIntakeMotorCANPort = CANPort.CAN_S1;
+    public static final CANBus kIntakeMotorCANBus = new CANBus(kIntakeMotorCANPort);
+
+    // REV Through Bore (absolute, duty cycle) on the pivot shaft - reads pivot angle in degrees
+    public static final int kIntakePivotEncoderID = 0;
+    public static final double kIntakePivotEncoderOffset = 0; // raw encoder degrees when the pivot is stowed - measure on robot
+    public static final boolean kIntakePivotEncoderInverted = false; // flip so the angle increases toward deploy
+
+    public static final double kIntakePivotZero = 0;
+    public static final double kIntakePivotDeployAngle = 104.14;
+    public static final double kIntakePivotToleranceDegrees = 2.0; // how close counts as "there" for deploy/stow
+
+    // TODO: set real CAN IDs - all three are 0 on the intake branch
+    public static final int kINTAKE_PIVOT_ID = 0;
+    public static final int kINTAKE_ROLLER_1_ID = 0;
+    public static final int kINTAKE_ROLLER_2_ID = 0;
+
+    public static final MotorAlignmentValue kINTAKE_ROLLER_2_ALIGNMENT = MotorAlignmentValue.Aligned;
+
+    public static final double kINTAKE_PIVOT_DEPLOY_POWER = 0.5;
+    public static final double kINTAKE_PIVOT_STOW_POWER = -0.5;
+
+    public static final double kINTAKE_ROLLER_IN_POWER = 0.5;
+    public static final double kINTAKE_ROLLER_OUT_POWER = -0.5;
+
+    public static final double kINTAKE_P = 0.8;
+    public static final double kINTAKE_I = 0.0;
+    public static final double kINTAKE_D = 0.0;
+
+    public static final double kIntakePivotGearRatio = 1.0; // motor rotations per pivot rotation - set to real ratio
+
+    // TalonFX Slot0 PositionVoltage gains, in volts per pivot rotation of error (starting points - tune on robot)
+    public static final double kIntakePIDp = 24.0;
+    public static final double kIntakePIDi = 0.0;
+    public static final double kIntakePIDd = 0.0;
+  }
+
   public static class ActiveFloorConstants {
     public static final int kFLOOR_ROLLER_MOTOR_ID = 9;
 

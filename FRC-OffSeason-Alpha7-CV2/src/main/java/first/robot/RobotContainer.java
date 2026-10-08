@@ -19,6 +19,10 @@ import com.ctre.phoenix6.hardware.CANrange;
 import first.robot.commands.DriveCommands;
 import first.robot.commands.ActiveFloor.FloorInward;
 import first.robot.commands.ActiveFloor.FloorOutward;
+import first.robot.commands.IntakeCommands.IntakePivotDeploy;
+import first.robot.commands.IntakeCommands.IntakePivotStow;
+import first.robot.commands.IntakeCommands.IntakeRollerIn;
+import first.robot.commands.IntakeCommands.IntakeRollerOut;
 import first.robot.commands.SpinShooterAtRPMCommand;
 import first.robot.commands.IndexerCommands.IndexInCommand;
 import first.robot.commands.IndexerCommands.IndexOutCommand;
@@ -26,6 +30,7 @@ import first.robot.commands.IndexerCommands.IndexUntilBallIn;
 import first.robot.subsystems.ActiveFloor;
 import first.robot.subsystems.CANRangeSensor;
 import first.robot.subsystems.Indexer;
+import first.robot.subsystems.Intake;
 import first.robot.subsystems.Shooter;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
@@ -60,6 +65,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Indexer indexer;
   private final Shooter shooter;
+  private final Intake intake;
   private final ActiveFloor activeFloor;
 
   private final CANRangeSensor indexerCANRange;
@@ -118,6 +124,7 @@ public class RobotContainer {
 
     indexer = new Indexer();
     shooter = new Shooter();
+    intake = new Intake();
     activeFloor = new ActiveFloor();
 
     indexerCANRange = new CANRangeSensor();
@@ -255,6 +262,12 @@ public class RobotContainer {
     controller.faceUp().whileTrue(indexInCommand);
     controller.leftBumper().whileTrue(indexOutCommand);
     controller.faceRight().whileTrue(indexUntilBallInCommand);
+
+    //intake buttons
+    controller.dpadUp().onTrue(new IntakePivotDeploy(intake));
+    controller.dpadDown().onTrue(new IntakePivotStow(intake));
+    controller.dpadLeft().whileTrue(new IntakeRollerIn(intake));
+    controller.dpadRight().whileTrue(new IntakeRollerOut(intake));
 
     //floor buttons
     controller.start().whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
