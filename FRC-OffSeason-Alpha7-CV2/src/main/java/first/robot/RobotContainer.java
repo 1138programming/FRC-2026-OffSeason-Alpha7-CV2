@@ -17,10 +17,13 @@ import org.wpilib.math.geometry.Rotation2d;
 import com.ctre.phoenix6.hardware.CANrange;
 
 import first.robot.commands.DriveCommands;
+import first.robot.commands.ActiveFloor.FloorInward;
+import first.robot.commands.ActiveFloor.FloorOutward;
 import first.robot.commands.SpinShooterAtRPMCommand;
 import first.robot.commands.IndexerCommands.IndexInCommand;
 import first.robot.commands.IndexerCommands.IndexOutCommand;
 import first.robot.commands.IndexerCommands.IndexUntilBallIn;
+import first.robot.subsystems.ActiveFloor;
 import first.robot.subsystems.CANRangeSensor;
 import first.robot.subsystems.Indexer;
 import first.robot.subsystems.Shooter;
@@ -42,6 +45,7 @@ import first.robot.subsystems.drive.ModuleIO;
 import first.robot.subsystems.drive.ModuleIOSim;
 import first.robot.subsystems.drive.ModuleIOTalonFX;
 
+import static first.robot.Constants.ActiveFloorConstants.*;
 import static first.robot.Constants.OperatorConstants.*;
 import static first.robot.Constants.ShooterConstants.*;
 
@@ -56,6 +60,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Indexer indexer;
   private final Shooter shooter;
+  private final ActiveFloor activeFloor;
 
   private final CANRangeSensor indexerCANRange;
 
@@ -113,6 +118,7 @@ public class RobotContainer {
 
     indexer = new Indexer();
     shooter = new Shooter();
+    activeFloor = new ActiveFloor();
 
     indexerCANRange = new CANRangeSensor();
 
@@ -249,6 +255,10 @@ public class RobotContainer {
     controller.faceUp().whileTrue(indexInCommand);
     controller.leftBumper().whileTrue(indexOutCommand);
     controller.faceRight().whileTrue(indexUntilBallInCommand);
+
+    //floor buttons
+    controller.start().whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
+    controller.leftStick().whileTrue(new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD));
     
   }
 

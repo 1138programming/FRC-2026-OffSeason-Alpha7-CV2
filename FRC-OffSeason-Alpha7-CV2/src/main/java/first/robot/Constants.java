@@ -96,6 +96,14 @@ public final class Constants {
     }
   }
 
+  // ------- Subsystem constants ----- //
+  public static class ActiveFloorConstants {
+    public static final int kFLOOR_ROLLER_MOTOR_ID = 9;
+
+    public static final double kFLOOR_POWER_INWARD = 0.5;
+    public static final double kFLOOR_POWER_OUTWARD = -0.5;
+  }
+
   public static class OperatorConstants {
     //Logitech Button Constants
     public static final int kLOGITECH_BUTTON_A = 0;
