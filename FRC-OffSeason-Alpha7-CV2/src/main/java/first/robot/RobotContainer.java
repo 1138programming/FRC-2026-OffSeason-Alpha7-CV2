@@ -5,6 +5,7 @@
 package first.robot;
 
 import org.littletonrobotics.junction.networktables.LoggedNetworkChooser;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
 import org.wpilib.command2.button.CommandGamepad;
@@ -16,11 +17,13 @@ import org.wpilib.math.geometry.Rotation2d;
 import com.ctre.phoenix6.hardware.CANrange;
 
 import first.robot.commands.DriveCommands;
+import first.robot.commands.SpinShooterAtRPMCommand;
 import first.robot.commands.IndexerCommands.IndexInCommand;
 import first.robot.commands.IndexerCommands.IndexOutCommand;
 import first.robot.commands.IndexerCommands.IndexUntilBallIn;
 import first.robot.subsystems.CANRangeSensor;
 import first.robot.subsystems.Indexer;
+import first.robot.subsystems.Shooter;
 import first.robot.subsystems.drive.Drive;
 import first.robot.subsystems.drive.DriveConstants;
 import first.robot.subsystems.drive.GyroIO;
@@ -40,6 +43,7 @@ import first.robot.subsystems.drive.ModuleIOSim;
 import first.robot.subsystems.drive.ModuleIOTalonFX;
 
 import static first.robot.Constants.OperatorConstants.*;
+import static first.robot.Constants.ShooterConstants.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -51,6 +55,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Indexer indexer;
+  private final Shooter shooter;
 
   private final CANRangeSensor indexerCANRange;
 
@@ -66,6 +71,8 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedNetworkChooser<Command> autoChooser;
+  private final LoggedNetworkNumber shooterTuningRPM =
+      new LoggedNetworkNumber("/Tuning/Shooter RPM", kShootRPM);
 
   public Trigger
     logitechButtonA,
@@ -105,6 +112,7 @@ public class RobotContainer {
   public RobotContainer() {
 
     indexer = new Indexer();
+    shooter = new Shooter();
 
     indexerCANRange = new CANRangeSensor();
 
@@ -216,9 +224,8 @@ public class RobotContainer {
     // Switch to X pattern when X is pressed
     controller.faceLeft().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset the gyro heading to 0 degrees when B is pressed
-    controller
-        .faceRight()
+    // Reset the gyro heading to 0 degrees when 'Back' is pressed
+    logitechButtonBack
         .onTrue(
             Commands.runOnce(
                     () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.ZERO)),
@@ -226,9 +233,22 @@ public class RobotContainer {
                 .ignoringDisable(true));
 
 
-    controller.leftTrigger().whileTrue(indexInCommand);
+    //shooter buttons (hold to spin, release to stop)
+    // Right trigger: spin up to the preset shot RPM
+    controller.rightTrigger().whileTrue(new SpinShooterAtRPMCommand(shooter, kShootRPM));
+    // Left trigger: spin up to the RPM set on the dashboard at /Tuning/Shooter RPM
+    controller.leftTrigger().whileTrue(new SpinShooterAtRPMCommand(shooter, shooterTuningRPM));
+    // Right bumper: open-loop test power, for checking direction before trusting the gains
+    controller
+        .rightBumper()
+        .whileTrue(
+            Commands.startEnd(
+                () -> shooter.spinFlywheelMotors(kTestDutyCycle), shooter::stopFlywheelMotors, shooter));
+
+    //indexer buttons (moved off LT/RB, which the shooter uses)
+    controller.faceUp().whileTrue(indexInCommand);
     controller.leftBumper().whileTrue(indexOutCommand);
-    controller.rightBumper().whileTrue(indexUntilBallInCommand);
+    controller.faceRight().whileTrue(indexUntilBallInCommand);
     
   }
 

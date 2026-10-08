@@ -9,6 +9,7 @@ import org.wpilib.hardware.bus.CANPort;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
 
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 /**
@@ -130,5 +131,42 @@ public final class Constants {
     public static final int kCANRangeID = 0;
     public static final double kMtoCM = 100.0;
     public static final double kNoFuelDistance = 38; //cm
+  }
+
+  public static class ShooterConstants{
+    public static final CANPort kshooterMotorCANbus = CANPort.CAN_S1;
+
+    // TODO: set real CAN IDs. While they match, followers are skipped and an alert is raised.
+    public static final int kshooterMotor1ID = 22; // leader
+    public static final int kshooterMotor2ID = 20;
+    public static final int kshooterMotor3ID = 24;
+
+    public static final double kFlywheelGearRatio = 2.0 / 3.0; // flywheel rotations per motor rotation
+
+    // Flip if positive output spins the flywheel backwards (check with the open-loop test button)
+    public static final InvertedValue kshooterMotor1Inverted = InvertedValue.CounterClockwise_Positive;
+
+    public static final double kStatorCurrentLimitAmps = 80;
+    public static final double kSupplyCurrentLimitAmps = 40;
+
+    // Control setpoints
+    public static final double kShootRPM = 3000; // preset shot, right trigger
+    public static final double kTestDutyCycle = 0.2; // open-loop test, right bumper
+
+    // Rough flywheel moment of inertia for simulation only (kg*m^2)
+    public static final double kFlywheelMOI = 0.004;
+
+    // VelocityVoltage gains, in volts per flywheel rotation per second (starting points - tune on robot)
+    public static final double kS = 0.15;
+    public static final double kV = 0.18;
+    public static final double kP = 0.1;
+    public static final double kI = 0;
+    public static final double kD = 0;
+
+    public static final double kFlywheelToleranceRPM = 50;
+
+    // Set to Opposed if a follower motor faces the opposite direction of motor 1
+    public static final MotorAlignmentValue kshooterMotor2Alignment = MotorAlignmentValue.Opposed;
+    public static final MotorAlignmentValue kshooterMotor3Alignment = MotorAlignmentValue.Opposed;
   }
 }
