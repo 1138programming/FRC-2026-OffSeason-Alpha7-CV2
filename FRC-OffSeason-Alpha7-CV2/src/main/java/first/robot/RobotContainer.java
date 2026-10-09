@@ -13,6 +13,9 @@ import org.wpilib.command2.button.JoystickButton;
 import org.wpilib.command2.button.Trigger;
 import org.wpilib.math.geometry.Pose2d;
 import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.driverstation.Alliance;
+import org.wpilib.driverstation.MatchState;
 
 import com.ctre.phoenix6.hardware.CANrange;
 
@@ -49,10 +52,15 @@ import first.robot.subsystems.drive.GyroIOPigeon2;
 import first.robot.subsystems.drive.ModuleIO;
 import first.robot.subsystems.drive.ModuleIOSim;
 import first.robot.subsystems.drive.ModuleIOTalonFX;
+import first.robot.subsystems.vision.Vision;
+import first.robot.subsystems.vision.VisionIO;
+import first.robot.subsystems.vision.VisionIOLimelight;
 
 import static first.robot.Constants.ActiveFloorConstants.*;
 import static first.robot.Constants.OperatorConstants.*;
 import static first.robot.Constants.ShooterConstants.*;
+import static first.robot.Constants.LimelightConstants.*;
+import static first.robot.Constants.FieldConstants.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -69,6 +77,7 @@ public class RobotContainer {
   private final ActiveFloor activeFloor;
 
   private final CANRangeSensor indexerCANRange;
+  private final Vision vision;
 
   // Controller. CommandGamepad uses controller-agnostic names: faceDown/faceRight/faceLeft/faceUp
   // are A/B/X/Y on an Xbox pad.
@@ -165,7 +174,18 @@ public class RobotContainer {
                   new ModuleIO() {},
                   new ModuleIO() {},
                   new ModuleIO() {});
+
+        
     }
+
+    vision = switch (Constants.getMode()) {
+        case REAL -> new Vision(new VisionIOLimelight(klimelightName, kROBOT_TO_CAMERA),
+            drive::addVisionMeasurement, drive::getRotation, drive::getYawRateRadPerSec);
+        default -> new Vision(new VisionIO() {},
+            drive::addVisionMeasurement, drive::getRotation, drive::getYawRateRadPerSec);
+    };
+
+    
 
     // Set up auto routines
     autoChooser = new LoggedNetworkChooser<>("/SmartDashboard/Auto Choices");
@@ -273,6 +293,14 @@ public class RobotContainer {
     controller.start().whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
     controller.leftStick().whileTrue(new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD));
     
+  }
+
+  /** Field-relative heading that points the robot's front at our alliance's HUB. */
+  private Rotation2d headingToGoal() {
+    boolean isRed = MatchState.getAlliance().orElse(Alliance.BLUE) == Alliance.RED;
+    Translation2d goal = isRed ? kRED_HUB : kBLUE_HUB;
+    // getAngle() is empty only when the robot is exactly on the goal; hold heading then.
+    return goal.minus(drive.getPose().getTranslation()).getAngle().orElse(drive.getRotation());
   }
 
   /**
