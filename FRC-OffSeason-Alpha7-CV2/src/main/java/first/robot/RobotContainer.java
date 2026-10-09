@@ -107,6 +107,7 @@ public class RobotContainer {
     logitechButtonRB,
     logitechButtonLT,
     logitechButtonRT,
+    logitechButtonStart,
     logitechButtonBack,
     logitechButtonDpadUp,
     logitechButtonDpadDown,
@@ -212,6 +213,7 @@ public class RobotContainer {
     logitechButtonRB = controller.button(kLOGITECH_BUTTON_RB);
     logitechButtonLT = controller.button(kLOGITECH_BUTTON_LT);
     logitechButtonRT = controller.button(kLOGITECH_BUTTON_RT);
+    logitechButtonStart = controller.button(kLOGITECH_BUTTON_START);
     logitechButtonBack = controller.button(kLOGITECH_BUTTON_BACK);
     logitechButtonDpadUp = controller.button(kLOGITECH_BUTTON_DPAD_UP);
     logitechButtonDpadDown = controller.button(kLOGITECH_BUTTON_DPAD_DOWN);
@@ -299,19 +301,19 @@ public class RobotContainer {
     logitechButtonLB.onTrue(Commands.runOnce(() -> fieldRelative = !fieldRelative));
 
     //indexer buttons
-    controller.faceUp().whileTrue(indexInCommand);
-    controller.leftBumper().whileTrue(indexOutCommand);
-    controller.faceRight().whileTrue(indexUntilBallInCommand);
+    logitechButtonY.whileTrue(indexInCommand);
+    logitechButtonA.whileTrue(indexOutCommand);
+    logitechButtonB.whileTrue(indexUntilBallInCommand);
 
     //intake buttons
-    controller.dpadUp().onTrue(new IntakePivotDeploy(intake));
-    controller.dpadDown().onTrue(new IntakePivotStow(intake));
-    controller.dpadLeft().whileTrue(new IntakeRollerIn(intake));
-    controller.dpadRight().whileTrue(new IntakeRollerOut(intake));
+    logitechButtonDpadUp.onTrue(new IntakePivotDeploy(intake));
+    logitechButtonDpadDown.onTrue(new IntakePivotStow(intake));
+    logitechButtonDpadLeft.whileTrue(new IntakeRollerIn(intake));
+    logitechButtonDpadRight.whileTrue(new IntakeRollerOut(intake));
 
     //floor buttons
-    controller.start().whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
-    controller.leftStick().whileTrue(new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD));
+    logitechButtonStart.whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
+    logitechButtonBack.whileTrue(new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD));
     
   }
 
