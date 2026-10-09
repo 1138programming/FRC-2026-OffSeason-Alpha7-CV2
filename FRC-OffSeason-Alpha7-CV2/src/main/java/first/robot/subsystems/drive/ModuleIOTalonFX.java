@@ -49,9 +49,11 @@ public class ModuleIOTalonFX implements ModuleIO {
   private static final double turnCurrentLimitAmps = 40;
 
   /** SDS MK4i L2: 6.12:1 drive, 150/7:1 steer. */
-  public static final double driveReduction = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
+  // public static final double driveReduction = (50.0 / 14.0) * (16.0 / 28.0) * (45.0 / 15.0);
+  // public static final double turnReduction = (150.0 / 7.0);
 
-  public static final double turnReduction = (150.0 / 7.0);
+  public static final double driveReduction = 5.27;
+  public static final double turnReduction = (287.0 / 11.0);
 
   private static final CANBus canBus =  new CANBus(CANPort.CAN_S0);
 

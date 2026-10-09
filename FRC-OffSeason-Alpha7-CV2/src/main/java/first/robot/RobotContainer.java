@@ -88,6 +88,7 @@ public class RobotContainer {
   private final IndexOutCommand indexOutCommand;
   private final IndexUntilBallIn indexUntilBallInCommand;
 
+  private boolean fieldRelative = true;
 
   // Dashboard inputs
   private final LoggedNetworkChooser<Command> autoChooser;
@@ -234,15 +235,19 @@ public class RobotContainer {
 
   /** Maps driver inputs to commands. */
   private void configureButtonBindings() {
-    // Default command, normal field-relative drive.
-    // +X on the field is away from the driver station and +Y is to the left, so forward on the
-    // stick (which reads negative) maps to +X and left (also negative) maps to +Y.
+    // Default command, field-relative drive with the red-alliance perspective flipped 180 degrees.
+    // Forward on the stick maps to -X and left maps to -Y before the alliance adjustment
+    // (sign convention from kramer/driver_trials, tested on the robot).
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
             drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            controller::getLeftY,
+            controller::getLeftX,
+            controller::getRightX,
+            () -> fieldRelative));
+
+    // Toggle field/robot relative on right stick press without interrupting the drive command
+    controller.rightStick().onTrue(Commands.runOnce(() -> fieldRelative = !fieldRelative));
 
     // Lock to 0 degrees while A is held
     controller
@@ -250,8 +255,8 @@ public class RobotContainer {
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
+                controller::getLeftY,
+                controller::getLeftX,
                 () -> Rotation2d.ZERO));
 
     // Switch to X pattern when X is pressed

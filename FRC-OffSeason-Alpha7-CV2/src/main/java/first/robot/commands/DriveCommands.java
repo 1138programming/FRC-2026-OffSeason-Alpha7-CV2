@@ -19,6 +19,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import first.robot.subsystems.drive.Drive;
@@ -52,13 +53,14 @@ public class DriveCommands {
   }
 
   /**
-   * Field relative drive command using two joysticks (controlling linear and angular velocities).
+   * Joystick drive with a live selection between field relative and robot relative translation.
    */
   public static Command joystickDrive(
       Drive drive,
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
-      DoubleSupplier omegaSupplier) {
+      DoubleSupplier omegaSupplier,
+      BooleanSupplier fieldRelativeSupplier) {
     System.out.println("Hello Drive Command: " + xSupplier.getAsDouble() + "," +  ySupplier.getAsDouble() + "," + omegaSupplier.getAsDouble());
     return Commands.run(
         () -> {
@@ -72,18 +74,20 @@ public class DriveCommands {
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
 
-          // Convert to field relative speeds & send command
+          // Scale the joystick inputs to chassis speeds
           ChassisVelocities speeds =
               new ChassisVelocities(
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
                   omega * drive.getMaxAngularSpeedRadPerSec());
-          boolean isFlipped = MatchState.getAlliance().orElse(Alliance.BLUE) == Alliance.RED;
-          drive.runVelocity(
-              speeds.toRobotRelative(
-                  isFlipped
-                      ? drive.getRotation().plus(new Rotation2d(Math.PI))
-                      : drive.getRotation()));
+          if (fieldRelativeSupplier.getAsBoolean()) {
+            boolean isFlipped = MatchState.getAlliance().orElse(Alliance.BLUE) == Alliance.RED;
+            speeds = speeds.toRobotRelative(
+                isFlipped
+                    ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                    : drive.getRotation());
+          }
+          drive.runVelocity(speeds);
         },
         drive);
   }
@@ -271,6 +275,15 @@ public class DriveCommands {
                               + " inches");
                     })));
   }
+
+  public static Command runVelocity(Drive drive, double vx, double vy, double omega) {
+    return Commands.run(
+        () -> {
+          ChassisVelocities speeds =  new ChassisVelocities(vx, vy, omega);
+          drive.runVelocity(speeds);
+        },
+        drive);
+    }
 
   private static class WheelRadiusCharacterizationState {
     double[] positions = new double[4];

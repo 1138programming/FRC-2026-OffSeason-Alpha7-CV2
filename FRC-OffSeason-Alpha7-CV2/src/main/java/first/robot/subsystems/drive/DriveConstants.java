@@ -66,8 +66,9 @@ public class DriveConstants {
         .driveMotorId(2)
         .turnMotorId(1)
         .encoderId(16)
-        .encoderOffset(Rotation2d.fromRadians(0.9022009671847623))
-        .turnInverted(true)
+        // .encoderOffset(Rotation2d.fromRotations(0.36355344672889695))
+        .encoderOffset(Rotation2d.fromRadians(-2.767))
+        .turnInverted(false)
         .encoderInverted(false)
         .build(),
     // FR
@@ -75,8 +76,9 @@ public class DriveConstants {
         .driveMotorId(4)
         .turnMotorId(3)
         .encoderId(1)
-        .encoderOffset(Rotation2d.fromRadians(1.6663099495963458))
-        .turnInverted(true)
+        //.encoderOffset(Rotation2d.fromRotations(-2.2948352586769194))
+        .encoderOffset(Rotation2d.fromRadians(0.836))
+        .turnInverted(false)
         .encoderInverted(false)
         .build(),
     // BL
@@ -84,8 +86,9 @@ public class DriveConstants {
         .driveMotorId(6)
         .turnMotorId(5)
         .encoderId(3)
-        .encoderOffset(Rotation2d.fromRadians(-0.09896592242077659))
-        .turnInverted(true)
+        //.encoderOffset(Rotation2d.fromRotations(0.6504078540635119	))
+        .encoderOffset(Rotation2d.fromRadians(-2.474))
+        .turnInverted(false)
         .encoderInverted(false)
         .build(),
     // BR
@@ -93,8 +96,9 @@ public class DriveConstants {
         .driveMotorId(8)
         .turnMotorId(7)
         .encoderId(4)
-        .encoderOffset(Rotation2d.fromRadians(-3.051832863487227))
-        .turnInverted(true)
+        //.encoderOffset(Rotation2d.fromRotations(-1.5125050568552423))
+        .encoderOffset(Rotation2d.fromRadians(1.608))
+        .turnInverted(false)
         .encoderInverted(false)
         .build()
   };
