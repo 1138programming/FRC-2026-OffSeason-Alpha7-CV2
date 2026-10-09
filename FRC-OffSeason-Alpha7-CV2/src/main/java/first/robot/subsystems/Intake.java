@@ -1,11 +1,13 @@
 package first.robot.subsystems;
 
+import org.littletonrobotics.junction.Logger;
 import org.wpilib.command2.SubsystemBase;
 import org.wpilib.hardware.rotation.DutyCycleEncoder;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
@@ -18,7 +20,10 @@ import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 
 import org.wpilib.math.controller.PIDController;
+import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Voltage;
 
 
 import static first.robot.Constants.IntakeConstants.*;
@@ -39,6 +44,17 @@ public class Intake extends SubsystemBase
     private boolean isDeployed;
     private boolean isPivotSeeded;
 
+    private StatusSignal<AngularVelocity> rollerVelocitySignal;
+    private StatusSignal<Voltage> rollerAppliedVoltsSignal;
+    private StatusSignal<Current> rollerStatorCurrentSignal;
+    private StatusSignal<Angle> pivotPositionSignal;
+    private StatusSignal<Voltage> pivotAppliedVoltsSignal;
+    private StatusSignal<Current> pivotStatorCurrentSignal;
+
+    private double rollerRequestedPower = 0.0;
+    private double pivotRequestedPower = 0.0;
+    private double pivotSetpointDegrees = Double.NaN; // NaN when not under position control
+
     public Intake ()
     {
         IntakeRollerMotor1 = new TalonFX (kINTAKE_ROLLER_1_ID, kIntakeMotorCANBus);
@@ -58,6 +74,16 @@ public class Intake extends SubsystemBase
 
         isDeployed = false;
         isPivotSeeded = false;
+
+        rollerVelocitySignal = IntakeRollerMotor1.getVelocity(false);
+        rollerAppliedVoltsSignal = IntakeRollerMotor1.getMotorVoltage(false);
+        rollerStatorCurrentSignal = IntakeRollerMotor1.getStatorCurrent(false);
+        pivotPositionSignal = IntakePivotMotor.getPosition(false);
+        pivotAppliedVoltsSignal = IntakePivotMotor.getMotorVoltage(false);
+        pivotStatorCurrentSignal = IntakePivotMotor.getStatorCurrent(false);
+        BaseStatusSignal.setUpdateFrequencyForAll(50,
+            rollerVelocitySignal, rollerAppliedVoltsSignal, rollerStatorCurrentSignal,
+            pivotPositionSignal, pivotAppliedVoltsSignal, pivotStatorCurrentSignal);
     }
 
     private void configureIntakeMotors()
@@ -100,21 +126,27 @@ public class Intake extends SubsystemBase
 
     public void stopIntakeRollers ()
     {
+        rollerRequestedPower = 0.0;
         IntakeRollerMotor1.setControl(mstopRequest);
     }
 
     public void stopIntakePivot ()
     {
+        pivotRequestedPower = 0.0;
+        pivotSetpointDegrees = Double.NaN;
         IntakePivotMotor.setControl(mstopRequest);
     }
 
     public void setIntakeRollerPower(double power)
     {
+        rollerRequestedPower = power;
         IntakeRollerMotor1.setControl(mintakePowerRequest.withOutput(power));
     }
 
     public void setIntakePivotPower(double power)
     {
+        pivotRequestedPower = power;
+        pivotSetpointDegrees = Double.NaN;
         IntakePivotMotor.setControl(mintakePowerRequest.withOutput(power));
     }
 
@@ -171,6 +203,8 @@ public class Intake extends SubsystemBase
             return;
         }
 
+        pivotRequestedPower = 0.0;
+        pivotSetpointDegrees = position;
         IntakePivotMotor.setControl(mpivotPositionRequest.withPosition(degreesToRotations(position)));
     }
 
@@ -186,5 +220,25 @@ public class Intake extends SubsystemBase
         {
             seedPivotFromEncoder();
         }
+
+        BaseStatusSignal.refreshAll(
+            rollerVelocitySignal, rollerAppliedVoltsSignal, rollerStatorCurrentSignal,
+            pivotPositionSignal, pivotAppliedVoltsSignal, pivotStatorCurrentSignal);
+
+        Logger.recordOutput("Intake/RollerRequestedPower", rollerRequestedPower);
+        Logger.recordOutput("Intake/RollerRPM", rollerVelocitySignal.getValueAsDouble() * 60.0);
+        Logger.recordOutput("Intake/RollerAppliedVolts", rollerAppliedVoltsSignal.getValueAsDouble());
+        Logger.recordOutput("Intake/RollerStatorCurrentAmps", rollerStatorCurrentSignal.getValueAsDouble());
+
+        Logger.recordOutput("Intake/PivotRequestedPower", pivotRequestedPower);
+        Logger.recordOutput("Intake/PivotSetpointDegrees", pivotSetpointDegrees);
+        Logger.recordOutput("Intake/PivotEncoderDegrees", getIntakeEncoder());
+        Logger.recordOutput("Intake/PivotMotorDegrees", pivotPositionSignal.getValueAsDouble() * 360.0);
+        Logger.recordOutput("Intake/PivotAppliedVolts", pivotAppliedVoltsSignal.getValueAsDouble());
+        Logger.recordOutput("Intake/PivotStatorCurrentAmps", pivotStatorCurrentSignal.getValueAsDouble());
+
+        Logger.recordOutput("Intake/EncoderConnected", IntakePivotEncoder.isConnected());
+        Logger.recordOutput("Intake/PivotSeeded", isPivotSeeded);
+        Logger.recordOutput("Intake/Deployed", isDeployed);
     }
 }
