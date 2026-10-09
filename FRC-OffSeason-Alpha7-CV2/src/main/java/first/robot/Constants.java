@@ -113,8 +113,8 @@ public final class Constants {
     public static final double kIntakePivotToleranceDegrees = 2.0; // how close counts as "there" for deploy/stow
 
     public static final int kINTAKE_PIVOT_ID = 0;
-    public static final int kINTAKE_ROLLER_1_ID = 0;
-    public static final int kINTAKE_ROLLER_2_ID = 0;
+    public static final int kINTAKE_ROLLER_1_ID = 31;
+    public static final int kINTAKE_ROLLER_2_ID = 32;
 
     public static final MotorAlignmentValue kINTAKE_ROLLER_2_ALIGNMENT = MotorAlignmentValue.Aligned;
 
@@ -127,6 +127,16 @@ public final class Constants {
     public static final double kINTAKE_P = 0.8;
     public static final double kINTAKE_I = 0.0;
     public static final double kINTAKE_D = 0.0;
+
+    // Set to Opposed if roller 2 faces the opposite direction of roller 1
+    public static final MotorAlignmentValue kIntakeRoller2Alignment = MotorAlignmentValue.Aligned;
+
+    public static final double kIntakePivotGearRatio = 1.0; // motor rotations per pivot rotation - set to real ratio
+
+    // TalonFX Slot0 PositionVoltage gains, in volts per pivot rotation of error (starting points - tune on robot)
+    public static final double kIntakePIDp = 24.0;
+    public static final double kIntakePIDi = 0.0;
+    public static final double kIntakePIDd = 0.0;
   }
   
   public static class ActiveFloorConstants {
@@ -178,15 +188,12 @@ public final class Constants {
     public static final double kSHOOTER_STATOR_CURRENT_LIMIT = 100;
     public static final double kSHOOTER_SUPPLY_CURRENT_LIMIT = 60;
 
-    // Set to Opposed if roller 2 faces the opposite direction of roller 1
-    public static final MotorAlignmentValue kIntakeRoller2Alignment = MotorAlignmentValue.Aligned;
-
-    public static final double kIntakePivotGearRatio = 1.0; // motor rotations per pivot rotation - set to real ratio
-
-    // TalonFX Slot0 PositionVoltage gains, in volts per pivot rotation of error (starting points - tune on robot)
-    public static final double kIntakePIDp = 24.0;
-    public static final double kIntakePIDi = 0.0;
-    public static final double kIntakePIDd = 0.0;
+    //RPMs 
+    public static final double kFLYWHEEL_TOLERANCE_RPM = 4000;
+    public static final double kFLYWHEEL_DEFAULT_RPM = 3000;
+    
+    public static final MotorAlignmentValue kSHOOTER_MOTOR_2_ALIGNMENT = MotorAlignmentValue.Aligned;
+    public static final MotorAlignmentValue kSHOOTER_MOTOR_3_ALIGNMENT = MotorAlignmentValue.Aligned;
   }
 
   public static class CANRangeConstants{

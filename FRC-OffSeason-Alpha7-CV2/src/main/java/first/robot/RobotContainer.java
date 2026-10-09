@@ -62,6 +62,7 @@ import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_INWARD;
 import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_OUTWARD;
 import static first.robot.Constants.IndexerConstants.kINDEX_IN_POWER;
 import static first.robot.Constants.IndexerConstants.kINDEX_OUT_POWER;
+import static first.robot.Constants.IntakeConstants.kINTAKE_ROLLER_IN_POWER;
 import static first.robot.Constants.OperatorConstants.*;
 import static first.robot.Constants.ShooterConstants.kFLYWHEEL_DEFAULT_RPM;
 
@@ -97,8 +98,6 @@ public class RobotContainer {
   private final CommandGamepad controller = new CommandGamepad(0);
   private final CommandGamepad compStreamDeck = new CommandGamepad(1);
 
-  private final IndexInCommand indexInCommand;
-  private final IndexOutCommand indexOutCommand;
   private final IndexUntilBallIn indexUntilBallInCommand;
 
 
@@ -158,6 +157,8 @@ public class RobotContainer {
     indexOut = new IndexOutCommand(indexer, kINDEX_OUT_POWER);
     indexUntilBallInCommand = new IndexUntilBallIn(indexerCANRange, indexer);
     spinShooterAtRPM = new SpinShooterAtRPMCommand(shooter, kFLYWHEEL_DEFAULT_RPM); 
+    floorInwardCommand = new FloorInward(activeFloor, kINTAKE_ROLLER_IN_POWER);
+    floorOutwardCommand = new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD);
 
     switch (Constants.getMode()) {
       case REAL ->
@@ -192,10 +193,6 @@ public class RobotContainer {
                   new ModuleIO() {});
     }
 
-    activeFloor = new ActiveFloor();
-
-    floorInwardCommand = new FloorInward(activeFloor);
-    floorOutwardCommand = new FloorOutward(activeFloor);
 
     // Set up auto routines
     autoChooser = new LoggedNetworkChooser<>("/SmartDashboard/Auto Choices");

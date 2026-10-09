@@ -4,8 +4,6 @@
 
 package first.robot.commands.ActiveFloor;
 
-import static first.robot.Constants.ActiveFloorConstants.kFLOOR_POWER_INWARD;
-
 import org.wpilib.command2.Command;
 
 import first.robot.subsystems.ActiveFloor;

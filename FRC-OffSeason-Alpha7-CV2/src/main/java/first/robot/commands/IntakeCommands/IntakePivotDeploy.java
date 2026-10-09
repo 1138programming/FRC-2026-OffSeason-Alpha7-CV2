@@ -28,7 +28,7 @@ public class IntakePivotDeploy extends Command {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        intake.intakePivotToPosition(kINTAKE_PIVOT_DEPLOY_ANGLE);
+        intake.intakePivotToPosition(kIntakePivotDeployAngle);
     }
 
     // Called once the command ends or is interrupted.
