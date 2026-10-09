@@ -164,6 +164,10 @@ public final class Constants {
     public static final int kLOGITECH_BUTTON_RT = 16;
     public static final int kLOGITECH_BUTTON_BACK = 4;
     public static final int kLOGITECH_BUTTON_START = 6;
+    public static final int kLOGITECH_BUTTON_DPAD_UP = 11;
+    public static final int kLOGITECH_BUTTON_DPAD_DOWN = 12;
+    public static final int kLOGITECH_BUTTON_DPAD_LEFT = 13;
+    public static final int kLOGITECH_BUTTON_DPAD_RIGHT = 14;
 
 
   }

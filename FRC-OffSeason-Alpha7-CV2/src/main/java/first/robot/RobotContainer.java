@@ -108,7 +108,10 @@ public class RobotContainer {
     logitechButtonLT,
     logitechButtonRT,
     logitechButtonBack,
-    logitechButtonStart;
+    logitechButtonDpadUp,
+    logitechButtonDpadDown,
+    logitechButtonDpadLeft,
+    logitechButtonDpadRight;
 
 
   public Trigger 
@@ -210,7 +213,10 @@ public class RobotContainer {
     logitechButtonLT = controller.button(kLOGITECH_BUTTON_LT);
     logitechButtonRT = controller.button(kLOGITECH_BUTTON_RT);
     logitechButtonBack = controller.button(kLOGITECH_BUTTON_BACK);
-    logitechButtonStart = controller.button(kLOGITECH_BUTTON_START);
+    logitechButtonDpadUp = controller.button(kLOGITECH_BUTTON_DPAD_UP);
+    logitechButtonDpadDown = controller.button(kLOGITECH_BUTTON_DPAD_DOWN);
+    logitechButtonDpadLeft = controller.button(kLOGITECH_BUTTON_DPAD_LEFT);
+    logitechButtonDpadRight = controller.button(kLOGITECH_BUTTON_DPAD_RIGHT);
 
     compStreamDeck1 = compStreamDeck.button(1);
     compStreamDeck2 = compStreamDeck.button(2);
@@ -288,6 +294,9 @@ public class RobotContainer {
         .whileTrue(
             Commands.startEnd(
                 () -> shooter.spinFlywheelMotors(kTestDutyCycle), shooter::stopFlywheelMotors, shooter));
+    
+    //toggle field relative 
+    logitechButtonLB.onTrue(Commands.runOnce(() -> fieldRelative = !fieldRelative));
 
     //indexer buttons
     controller.faceUp().whileTrue(indexInCommand);
