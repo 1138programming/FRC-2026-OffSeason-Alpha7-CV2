@@ -239,16 +239,16 @@ public class RobotContainer {
     // Left trigger: spin up to the RPM set on the dashboard at /Tuning/Shooter RPM
     controller.leftTrigger().whileTrue(new SpinShooterAtRPMCommand(shooter, shooterTuningRPM));
     // Right bumper: open-loop test power, for checking direction before trusting the gains
-    controller
-        .rightBumper()
-        .whileTrue(
-            Commands.startEnd(
-                () -> shooter.spinFlywheelMotors(kTestDutyCycle), shooter::stopFlywheelMotors, shooter));
+    // controller
+    //     .rightBumper()
+    //     .whileTrue(
+    //         Commands.startEnd(
+    //             () -> shooter.spinFlywheelMotors(kTestDutyCycle), shooter::stopFlywheelMotors, shooter));
 
     //indexer buttons (moved off LT/RB, which the shooter uses)
     controller.faceUp().whileTrue(indexInCommand);
     controller.leftBumper().whileTrue(indexOutCommand);
-    controller.faceRight().whileTrue(indexUntilBallInCommand);
+    controller.rightBumper().whileTrue(indexUntilBallInCommand);
     
   }
 
