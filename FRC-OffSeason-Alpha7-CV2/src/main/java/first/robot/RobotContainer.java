@@ -4,6 +4,9 @@
 
 package first.robot;
 
+import java.util.function.DoubleSupplier;
+
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkChooser;
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 import org.wpilib.command2.Command;
@@ -262,20 +265,23 @@ public class RobotContainer {
     // Switch to X pattern when X is pressed
     controller.faceLeft().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset the gyro heading to 0 degrees when 'Back' is pressed
+    // Reset the heading to "facing away from our driver station" when 'Back' is pressed.
+    // On red that is 180 degrees; vision and auto-aim need the true field heading.
     logitechButtonBack
         .onTrue(
             Commands.runOnce(
-                    () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), Rotation2d.ZERO)),
+                    () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(),
+                        isRed() ? Rotation2d.PI : Rotation2d.ZERO)),
                     drive)
                 .ignoringDisable(true));
 
 
-    //shooter buttons (hold to spin, release to stop)
-    // Right trigger: spin up to the preset shot RPM
-    controller.rightTrigger().whileTrue(new SpinShooterAtRPMCommand(shooter, kShootRPM));
-    // Left trigger: spin up to the RPM set on the dashboard at /Tuning/Shooter RPM
-    controller.leftTrigger().whileTrue(new SpinShooterAtRPMCommand(shooter, shooterTuningRPM));
+    //shooter buttons (hold to aim + spin + feed, release to stop)
+    // Right trigger: RPM from the distance table. Aims at our HUB, or at our alliance zone
+    // (shuttle) when in the neutral zone.
+    controller.rightTrigger().whileTrue(aimAndShoot(this::distanceRPM));
+    // Left trigger: same, but RPM from the dashboard at /Tuning/Shooter RPM, for filling the tables
+    controller.leftTrigger().whileTrue(aimAndShoot(shooterTuningRPM));
     // Right bumper: open-loop test power, for checking direction before trusting the gains
     controller
         .rightBumper()
@@ -283,7 +289,7 @@ public class RobotContainer {
             Commands.startEnd(
                 () -> shooter.spinFlywheelMotors(kTestDutyCycle), shooter::stopFlywheelMotors, shooter));
 
-    //indexer buttons (moved off LT/RB, which the shooter uses)
+    //indexer buttons
     controller.faceUp().whileTrue(indexInCommand);
     controller.leftBumper().whileTrue(indexOutCommand);
     controller.faceRight().whileTrue(indexUntilBallInCommand);
@@ -300,12 +306,67 @@ public class RobotContainer {
     
   }
 
-  /** Field-relative heading that points the robot's front at our alliance's HUB. */
-  private Rotation2d headingToGoal() {
-    boolean isRed = MatchState.getAlliance().orElse(Alliance.BLUE) == Alliance.RED;
-    Translation2d goal = isRed ? kRED_HUB : kBLUE_HUB;
-    // getAngle() is empty only when the robot is exactly on the goal; hold heading then.
-    return goal.minus(drive.getPose().getTranslation()).getAngle().orElse(drive.getRotation());
+  /** Aims at the target and spins to rpm; the indexer and floor feed only while at that RPM. */
+  private Command aimAndShoot(DoubleSupplier rpm) {
+    return Commands.parallel(
+        DriveCommands.joystickDriveAtAngle(
+            drive, controller::getLeftY, controller::getLeftX, this::headingToTarget),
+        new SpinShooterAtRPMCommand(shooter, rpm),
+        // Pauses whenever a shot drops the flywheel out of tolerance, resumes once it recovers
+        Commands.run(
+                () -> {
+                  Logger.recordOutput("Shooter/DistanceToTarget", distanceToTarget());
+                  Logger.recordOutput("Shooter/Shuttling", inNeutralZone(drive.getPose().getTranslation()));
+                  if (shooter.isFlywheelAtSpeed()) {
+                    indexer.spinIndexerIn();
+                    activeFloor.setFloorPower(kFLOOR_POWER_INWARD);
+                  } else {
+                    indexer.stopIndexerMotors();
+                    activeFloor.stopfloor();
+                  }
+                },
+                indexer, activeFloor)
+            .finallyDo(() -> {
+              indexer.stopIndexerMotors();
+              activeFloor.stopfloor();
+            }));
+  }
+
+  private boolean isRed() {
+    return MatchState.getAlliance().orElse(Alliance.BLUE) == Alliance.RED;
+  }
+
+  /** Between the two HUBs, where shots go to our alliance zone instead of the HUB. */
+  static boolean inNeutralZone(Translation2d robot) {
+    return robot.getX() > kBLUE_HUB.getX() && robot.getX() < kRED_HUB.getX();
+  }
+
+  static Translation2d shotTarget(Translation2d robot, boolean isRed) {
+    if (inNeutralZone(robot)) {
+      return isRed ? kRED_SHUTTLE_TARGET : kBLUE_SHUTTLE_TARGET;
+    }
+    return isRed ? kRED_HUB : kBLUE_HUB;
+  }
+
+  private Translation2d shotTarget() {
+    return shotTarget(drive.getPose().getTranslation(), isRed());
+  }
+
+  private double distanceToTarget() {
+    return drive.getPose().getTranslation().getDistance(shotTarget());
+  }
+
+  private double distanceRPM() {
+    var table = inNeutralZone(drive.getPose().getTranslation()) ? kShuttleRPMTable : kHubRPMTable;
+    return table.get(distanceToTarget());
+  }
+
+  /** Field-relative heading that points the shooter at the current target. */
+  private Rotation2d headingToTarget() {
+    // getAngle() is empty only when the robot is exactly on the target; hold heading then.
+    return shotTarget().minus(drive.getPose().getTranslation()).getAngle()
+        .map(angle -> angle.minus(kShooterFacing))
+        .orElse(drive.getRotation());
   }
 
   /**

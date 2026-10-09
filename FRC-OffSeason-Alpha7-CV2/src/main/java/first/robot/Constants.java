@@ -7,11 +7,15 @@ package first.robot;
 import org.wpilib.framework.RobotBase;
 import org.wpilib.hardware.bus.CANPort;
 import org.wpilib.math.geometry.Pose3d;
+import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Rotation3d;
 import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.interpolation.InterpolatingDoubleTreeMap;
 import org.wpilib.math.util.Units;
 import org.wpilib.util.Alert;
 import org.wpilib.util.Alert.Level;
+
+import static java.util.Map.entry;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -178,6 +182,10 @@ public final class Constants {
     public static final double kFIELD_WIDTH = 8.069;
     public static final Translation2d kBLUE_HUB = new Translation2d(4.6255, 4.0346);
     public static final Translation2d kRED_HUB = new Translation2d(11.9155, 4.0346);
+
+    // Where shuttle shots aim inside each alliance zone (placeholder - tune on field)
+    public static final Translation2d kBLUE_SHUTTLE_TARGET = new Translation2d(2.0, 4.0346);
+    public static final Translation2d kRED_SHUTTLE_TARGET = new Translation2d(kFIELD_LENGTH - 2.0, 4.0346);
   }
 
   private Constants() {}
@@ -218,7 +226,23 @@ public final class Constants {
     public static final double kSupplyCurrentLimitAmps = 40;
 
     // Control setpoints
-    public static final double kShootRPM = 3000; // preset shot, right trigger
+    public static final double kShootRPM = 3000; // starting value for /Tuning/Shooter RPM, left trigger
+
+    // Robot-relative direction the shooter fires. ZERO = out the front, PI = out the back.
+    public static final Rotation2d kShooterFacing = Rotation2d.ZERO;
+
+    // Distance to target (m) -> flywheel RPM, linearly interpolated and clamped at the ends.
+    // Placeholders: tune by holding LT at a distance, adjusting /Tuning/Shooter RPM until it scores,
+    // and recording Shooter/DistanceToTarget -> RPM here.
+    public static final InterpolatingDoubleTreeMap kHubRPMTable = InterpolatingDoubleTreeMap.ofEntries(
+        entry(1.5, 2400.0),
+        entry(3.0, 2800.0),
+        entry(4.5, 3200.0),
+        entry(6.0, 3500.0));
+    public static final InterpolatingDoubleTreeMap kShuttleRPMTable = InterpolatingDoubleTreeMap.ofEntries(
+        entry(3.0, 2500.0),
+        entry(6.0, 3000.0),
+        entry(9.0, 3500.0));
     public static final double kTestDutyCycle = 0.2; // open-loop test, right bumper
 
     // Rough flywheel moment of inertia for simulation only (kg*m^2)
