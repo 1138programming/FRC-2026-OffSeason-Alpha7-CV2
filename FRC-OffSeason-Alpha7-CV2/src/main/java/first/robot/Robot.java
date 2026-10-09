@@ -3,6 +3,9 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package first.robot;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.wpilib.command2.Command;
 import org.wpilib.command2.CommandScheduler;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -66,9 +69,20 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
 
+    // Log which commands are running (Commands/<name>). Counts handle several running with one name.
+    Map<String, Integer> commandCounts = new HashMap<>();
+    CommandScheduler.getInstance().onCommandInitialize(c -> logCommand(commandCounts, c, 1));
+    CommandScheduler.getInstance().onCommandFinish(c -> logCommand(commandCounts, c, -1));
+    CommandScheduler.getInstance().onCommandInterrupt(c -> logCommand(commandCounts, c, -1));
+
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+  }
+
+  private static void logCommand(Map<String, Integer> counts, Command command, int delta) {
+    int count = counts.merge(command.getName(), delta, Integer::sum);
+    Logger.recordOutput("Commands/" + command.getName(), count > 0);
   }
 
   /** This function is called periodically during all modes. */

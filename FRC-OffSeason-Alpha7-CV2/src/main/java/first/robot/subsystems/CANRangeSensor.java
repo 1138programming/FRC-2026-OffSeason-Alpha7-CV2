@@ -5,6 +5,7 @@
 package first.robot.subsystems;
 
 import static first.robot.Constants.CANRangeConstants.*;
+import org.littletonrobotics.junction.Logger;
 import org.wpilib.command2.SubsystemBase;
 
 import com.ctre.phoenix6.CANBus;
@@ -29,6 +30,8 @@ public class CANRangeSensor extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    Logger.recordOutput("CANRange/DistanceCM", getDistanceFromObjectCM());
+    Logger.recordOutput("CANRange/BallInIndexer", IsBallInIndexer());
+    Logger.recordOutput("CANRange/Connected", CANRangeSensor.isConnected());
   }
 }
