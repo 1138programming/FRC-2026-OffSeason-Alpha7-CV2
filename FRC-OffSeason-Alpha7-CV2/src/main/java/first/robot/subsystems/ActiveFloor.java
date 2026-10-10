@@ -38,7 +38,7 @@ public class ActiveFloor extends SubsystemBase {
   private double requestedPower = 0.0;
   /** Creates a new ActiveFloor. */
   public ActiveFloor() {
-    floorRollerMotor = new TalonFX(kFLOOR_ROLLER_MOTOR_ID,new CANBus(CANPort.CAN_S0));
+    floorRollerMotor = new TalonFX(kFLOOR_ROLLER_MOTOR_ID,new CANBus(CANPort.CAN_S1));
 
     mfloorRunRequest = new DutyCycleOut(0.0);
     mstopRequest = new NeutralOut();

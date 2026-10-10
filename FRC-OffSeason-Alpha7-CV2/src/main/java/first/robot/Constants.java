@@ -112,7 +112,7 @@ public final class Constants {
     public static final CANBus kIntakeMotorCANBus = new CANBus(kIntakeMotorCANPort);
 
     // REV Through Bore (absolute, duty cycle) on the pivot shaft - reads pivot angle in degrees
-    public static final int kIntakePivotEncoderID = 0;
+    public static final int kIntakePivotEncoderID = 5;
     public static final double kIntakePivotEncoderOffset = 0; // raw encoder degrees when the pivot is stowed - measure on robot
     public static final boolean kIntakePivotEncoderInverted = false; // flip so the angle increases toward deploy
 
@@ -121,11 +121,11 @@ public final class Constants {
     public static final double kIntakePivotToleranceDegrees = 2.0; // how close counts as "there" for deploy/stow
 
     // TODO: set real CAN IDs - all three are 0 on the intake branch
-    public static final int kINTAKE_PIVOT_ID = 0;
-    public static final int kINTAKE_ROLLER_1_ID = 0;
-    public static final int kINTAKE_ROLLER_2_ID = 0;
+    public static final int kINTAKE_PIVOT_ID = 33;
+    public static final int kINTAKE_ROLLER_1_ID = 31;
+    public static final int kINTAKE_ROLLER_2_ID = 32;
 
-    public static final MotorAlignmentValue kINTAKE_ROLLER_2_ALIGNMENT = MotorAlignmentValue.Aligned;
+    public static final MotorAlignmentValue kINTAKE_ROLLER_2_ALIGNMENT = MotorAlignmentValue.Opposed;
 
     public static final double kINTAKE_PIVOT_DEPLOY_POWER = 0.5;
     public static final double kINTAKE_PIVOT_STOW_POWER = -0.5;
@@ -146,7 +146,7 @@ public final class Constants {
   }
 
   public static class ActiveFloorConstants {
-    public static final int kFLOOR_ROLLER_MOTOR_ID = 9;
+    public static final int kFLOOR_ROLLER_MOTOR_ID = 40;
 
     public static final double kFLOOR_POWER_INWARD = 0.5;
     public static final double kFLOOR_POWER_OUTWARD = -0.5;
@@ -208,7 +208,7 @@ public final class Constants {
 
   public static class CANRangeConstants{
     public static final String kS0 = "*";
-    public static final int kCANRangeID = 0;
+    public static final int kCANRangeID = 6;
     public static final double kMtoCM = 100.0;
     public static final double kNoFuelDistance = 38; //cm
   }
@@ -230,7 +230,7 @@ public final class Constants {
     public static final double kSupplyCurrentLimitAmps = 40;
 
     // Control setpoints
-    public static final double kShootRPM = 3000; // starting value for /Tuning/Shooter RPM, left trigger
+    public static final double kShootRPM = 2000; // starting value for /Tuning/Shooter RPM, left trigger
 
     // Robot-relative direction the shooter fires. ZERO = out the front, PI = out the back.
     public static final Rotation2d kShooterFacing = Rotation2d.ZERO;
@@ -259,7 +259,7 @@ public final class Constants {
     public static final double kI = 0;
     public static final double kD = 0;
 
-    public static final double kFlywheelToleranceRPM = 50;
+    public static final double kFlywheelToleranceRPM = 4000;
 
     // Set to Opposed if a follower motor faces the opposite direction of motor 1
     public static final MotorAlignmentValue kshooterMotor2Alignment = MotorAlignmentValue.Opposed;

@@ -26,6 +26,8 @@ import first.robot.commands.DriveCommands;
 import first.robot.commands.ActiveFloor.FloorInward;
 import first.robot.commands.ActiveFloor.FloorOutward;
 import first.robot.commands.IntakeCommands.IntakePivotDeploy;
+import first.robot.commands.IntakeCommands.IntakePivotForward;
+import first.robot.commands.IntakeCommands.IntakePivotReverse;
 import first.robot.commands.IntakeCommands.IntakePivotStow;
 import first.robot.commands.IntakeCommands.IntakeRollerIn;
 import first.robot.commands.IntakeCommands.IntakeRollerOut;
@@ -91,6 +93,11 @@ public class RobotContainer {
   private final IndexOutCommand indexOutCommand;
   private final IndexUntilBallIn indexUntilBallInCommand;
 
+  private final SpinShooterAtRPMCommand spinShooterAtRPMCommand;
+
+  private final FloorInward floorInward;
+  private final FloorOutward floorOutward;
+
   private boolean fieldRelative = true;
 
   // Dashboard inputs
@@ -149,6 +156,11 @@ public class RobotContainer {
     indexInCommand = new IndexInCommand(indexer);
     indexOutCommand = new IndexOutCommand(indexer);
     indexUntilBallInCommand = new IndexUntilBallIn(indexerCANRange, indexer);
+
+    spinShooterAtRPMCommand = new SpinShooterAtRPMCommand(shooter, () -> 2000);
+
+    floorInward = new FloorInward(activeFloor, kFLOOR_POWER_INWARD);
+    floorOutward = new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD);
 
 
     switch (Constants.getMode()) {
@@ -275,7 +287,7 @@ public class RobotContainer {
 
     // Reset the heading to "facing away from our driver station" when 'Back' is pressed.
     // On red that is 180 degrees; vision and auto-aim need the true field heading.
-    logitechButtonBack
+    controller.back()
         .onTrue(
             Commands.runOnce(
                     () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(),
@@ -287,15 +299,15 @@ public class RobotContainer {
     //shooter buttons (hold to aim + spin + feed, release to stop)
     // Right trigger: RPM from the distance table. Aims at our HUB, or at our alliance zone
     // (shuttle) when in the neutral zone.
-    controller.rightTrigger().whileTrue(aimAndShoot(this::distanceRPM));
+    //controller.rightTrigger().whileTrue(aimAndShoot(this::distanceRPM));
     // Left trigger: same, but RPM from the dashboard at /Tuning/Shooter RPM, for filling the tables
-    controller.leftTrigger().whileTrue(aimAndShoot(shooterTuningRPM));
+    //controller.leftTrigger().whileTrue(aimAndShoot(shooterTuningRPM));
     // Right bumper: open-loop test power, for checking direction before trusting the gains
-    controller
-        .rightBumper()
-        .whileTrue(
-            Commands.startEnd(
-                () -> shooter.spinFlywheelMotors(kTestDutyCycle), shooter::stopFlywheelMotors, shooter));
+    // controller
+    //     .rightBumper()
+    //     .whileTrue(
+    //         Commands.startEnd(
+    //             () -> shooter.spinFlywheelMotors(kTestDutyCycle), shooter::stopFlywheelMotors, shooter));
     
     //toggle field relative 
     logitechButtonLB.onTrue(Commands.runOnce(() -> fieldRelative = !fieldRelative));
@@ -305,15 +317,22 @@ public class RobotContainer {
     logitechButtonA.whileTrue(indexOutCommand);
     logitechButtonB.whileTrue(indexUntilBallInCommand);
 
+    logitechButtonBack.whileTrue(spinShooterAtRPMCommand);
+
+    logitechButtonLB.whileTrue(floorInward);
+    logitechButtonRB.whileTrue(floorOutward);
+
+
+
     //intake buttons
-    logitechButtonDpadUp.onTrue(new IntakePivotDeploy(intake));
-    logitechButtonDpadDown.onTrue(new IntakePivotStow(intake));
+    logitechButtonDpadUp.whileTrue(new IntakePivotForward(intake));
+    logitechButtonDpadDown.whileTrue(new IntakePivotReverse(intake));
     logitechButtonDpadLeft.whileTrue(new IntakeRollerIn(intake));
     logitechButtonDpadRight.whileTrue(new IntakeRollerOut(intake));
 
     //floor buttons
-    logitechButtonStart.whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
-    logitechButtonBack.whileTrue(new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD));
+    // logitechButtonStart.whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
+    // logitechButtonBack.whileTrue(new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD));
     
   }
 

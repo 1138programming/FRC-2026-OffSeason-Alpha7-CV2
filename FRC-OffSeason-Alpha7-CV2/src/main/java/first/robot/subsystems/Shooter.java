@@ -106,7 +106,6 @@ public class Shooter extends SubsystemBase {
   }
 
   public void stopFlywheelMotors(){
-    targetRPM = 0.0;
     shooterMotor1.setControl(shooterStopRequest);
   }
 
@@ -116,7 +115,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void spinFlywheelAtRPM(double rpm){
-    targetRPM = rpm;
+    System.out.println("Hello Shooter: rpm = " + rpm);
     shooterMotor1.setControl(shooterVelocityRequest.withVelocity(rpm / 60.0));
   }
 

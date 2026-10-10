@@ -48,7 +48,6 @@ public class Indexer extends SubsystemBase {
   }
 
   public void spinIndexerMotors(double power){
-    requestedPower = power;
     indexerRight.setControl(indexerRunRequest.withOutput(power));
   }
 
