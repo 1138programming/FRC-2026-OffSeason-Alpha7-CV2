@@ -12,17 +12,19 @@ import org.wpilib.system.Timer;
 
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class BasketballDrive extends Command {
+public class BasketballTurnTime extends Command {
   private Drive drive;
   private double seconds;
-  private boolean forward;
+  private boolean positiveAngle;
+  private double speed;
   private Timer timer;
 
   /** Creates a new IndexCommand. */
-  public BasketballDrive(Drive drive, double seconds, boolean forward) {
+  public BasketballDriveTime(Drive drive, double seconds, double speed, boolean positiveAngle) {
     this.drive = drive;
     this.seconds = seconds;
-    this.forward = forward;
+    this.positiveAngle = positiveAngle;
+    this.speed = speed;
     this.timer = new Timer();
 
     addRequirements(drive);
@@ -37,7 +39,7 @@ public class BasketballDrive extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    DriveCommands.runVelocity(drive, forward ? 1:0, 0, 0);
+    DriveCommands.runVelocity(drive, 0, 0, positiveAngle ? speed : -speed);
   }
 
   // Called once the command ends or is interrupted.
