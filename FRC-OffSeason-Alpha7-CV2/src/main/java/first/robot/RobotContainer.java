@@ -209,6 +209,8 @@ public class RobotContainer {
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.add(
         "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+    autoChooser.add(
+        "Basketball Training Routine", basketball);
 
     logitechButtonA = controller.button(kLOGITECH_BUTTON_A);
     logitechButtonB = controller.button(kLOGITECH_BUTTON_B);
@@ -320,7 +322,7 @@ public class RobotContainer {
     logitechButtonStart.whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
     logitechButtonBack.whileTrue(new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD));
     
-    logitechButtonB.onTrue(basketball);
+    //logitechButtonB.onTrue(basketball);
   }
 
   /** Aims at the target and spins to rpm; the indexer and floor feed only while at that RPM. */
