@@ -251,7 +251,7 @@ public class RobotContainer {
 
   /** Maps driver inputs to commands. */
   private void configureButtonBindings() {
-    /*// Default command, field-relative drive with the red-alliance perspective flipped 180 degrees.
+    // Default command, field-relative drive with the red-alliance perspective flipped 180 degrees.
     // Forward on the stick maps to -X and left maps to -Y before the alliance adjustment
     // (sign convention from kramer/driver_trials, tested on the robot).
     drive.setDefaultCommand(
@@ -319,7 +319,7 @@ public class RobotContainer {
     //floor buttons
     logitechButtonStart.whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
     logitechButtonBack.whileTrue(new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD));
-    */
+    
     logitechButtonB.onTrue(basketball);
   }
 
