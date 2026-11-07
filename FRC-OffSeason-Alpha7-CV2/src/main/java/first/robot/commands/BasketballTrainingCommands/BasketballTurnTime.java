@@ -17,9 +17,11 @@ import first.robot.commands.DriveCommands;
 public class BasketballTurnTime extends ParallelDeadlineGroup {
 
   Drive drive;
+  double degPerSec;
 
   public BasketballTurnTime(Drive drive, double seconds, double degPerSec) {
     this.drive = drive;
+    this.degPerSec = Math.clamp(degPerSec, -180, 180);
 
     super(new WaitCommand(seconds));
 

@@ -17,9 +17,11 @@ import first.robot.commands.DriveCommands;
 public class BasketballDriveDistance extends ParallelDeadlineGroup {
 
   Drive drive;
+  double speed;
 
   public BasketballDriveDistance(Drive drive, double meters, double speed) {
-    this.drive = drive; 
+    this.drive = drive;
+    this.speed = Math.clamp(speed, -2, 2);
     super(new WaitCommand(Math.abs(meters/speed)));
 
     addCommands(DriveCommands.runVelocity(drive, speed*Math.copySign(1, meters), 0, 0 ));

@@ -33,6 +33,7 @@ import first.robot.commands.SpinShooterAtRPMCommand;
 import first.robot.commands.IndexerCommands.IndexInCommand;
 import first.robot.commands.IndexerCommands.IndexOutCommand;
 import first.robot.commands.IndexerCommands.IndexUntilBallIn;
+import first.robot.commands.BasketballTrainingCommands.Basketball;
 import first.robot.subsystems.ActiveFloor;
 import first.robot.subsystems.CANRangeSensor;
 import first.robot.subsystems.Indexer;
@@ -90,6 +91,8 @@ public class RobotContainer {
   private final IndexInCommand indexInCommand;
   private final IndexOutCommand indexOutCommand;
   private final IndexUntilBallIn indexUntilBallInCommand;
+
+  private final Basketball basketball;
 
   private boolean fieldRelative = true;
 
@@ -194,6 +197,8 @@ public class RobotContainer {
     };
 
     
+    basketball = new Basketball(drive);
+
 
     // Set up auto routines
     autoChooser = new LoggedNetworkChooser<>("/SmartDashboard/Auto Choices");
@@ -246,7 +251,7 @@ public class RobotContainer {
 
   /** Maps driver inputs to commands. */
   private void configureButtonBindings() {
-    // Default command, field-relative drive with the red-alliance perspective flipped 180 degrees.
+    /*// Default command, field-relative drive with the red-alliance perspective flipped 180 degrees.
     // Forward on the stick maps to -X and left maps to -Y before the alliance adjustment
     // (sign convention from kramer/driver_trials, tested on the robot).
     drive.setDefaultCommand(
@@ -314,7 +319,8 @@ public class RobotContainer {
     //floor buttons
     logitechButtonStart.whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
     logitechButtonBack.whileTrue(new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD));
-    
+    */
+    logitechButtonB.onTrue(basketball);
   }
 
   /** Aims at the target and spins to rpm; the indexer and floor feed only while at that RPM. */

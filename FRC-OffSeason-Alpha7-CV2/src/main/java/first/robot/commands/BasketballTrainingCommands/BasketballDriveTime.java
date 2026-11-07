@@ -17,9 +17,11 @@ import first.robot.commands.DriveCommands;
 public class BasketballDriveTime extends ParallelDeadlineGroup {
 
   Drive drive;
+  double speed;
 
   public BasketballDriveTime(Drive drive, double seconds, double speed) {
     this.drive = drive;
+    this.speed = Math.clamp(speed, -2, 2);
 
     super(new WaitCommand(seconds));
 

@@ -18,9 +18,11 @@ import java.lang.Math;
 public class BasketballTurnDegree extends ParallelDeadlineGroup {
 
   Drive drive;
+  double degPerSec;
 
   public BasketballTurnDegree(Drive drive, double degrees, double degPerSec) {
     this.drive = drive;
+    this.degPerSec = Math.clamp(degPerSec, -180, 180);
 
     super(new WaitCommand(Math.toRadians(degrees/degPerSec)));
 
