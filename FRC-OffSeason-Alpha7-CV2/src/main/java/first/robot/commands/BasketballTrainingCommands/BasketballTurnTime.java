@@ -18,11 +18,12 @@ public class BasketballTurnTime extends ParallelDeadlineGroup {
 
   Drive drive;
   double degPerSec;
+  double seconds;
 
   public BasketballTurnTime(Drive drive, double seconds, double degPerSec) {
     this.drive = drive;
-    degPerSec = Math.clamp(degPerSec, -180, 180);
-    seconds = Math.clamp (seconds, 0, 3.75);
+    this.degPerSec = Math.clamp(degPerSec, -180, 180);
+    this.seconds = Math.clamp (seconds, 0, 3.75);
 
     super(new WaitCommand(seconds));
 
