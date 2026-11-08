@@ -23,7 +23,7 @@ public class BasketballTurnDegree extends ParallelDeadlineGroup {
 
   public BasketballTurnDegree(Drive drive, double degrees, double degPerSec) {
     this.drive = drive;
-    this.degPerSec = Math.clamp(degPerSec, -180, 180);
+    degPerSec = Math.clamp(degPerSec, -180, 180);
 
     super(new WaitCommand(Math.abs(Math.toRadians(degrees/degPerSec))));
 
