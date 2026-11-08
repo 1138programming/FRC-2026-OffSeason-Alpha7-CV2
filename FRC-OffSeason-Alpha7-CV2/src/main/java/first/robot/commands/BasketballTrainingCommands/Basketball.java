@@ -9,6 +9,6 @@ public class Basketball extends SequentialCommandGroup{
     {
         // Add commands in the format: addCommands(new CommandName(drive, meters, seconds, etc.))
         // EX: addCommands(BasketballDriveTime(drive, ));
-        addCommands();
+        addCommands(new BasketballDriveTime(drive,3, 1));
     }
 }
