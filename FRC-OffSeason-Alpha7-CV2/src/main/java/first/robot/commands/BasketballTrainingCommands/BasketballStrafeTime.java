@@ -18,11 +18,12 @@ public class BasketballStrafeTime extends ParallelDeadlineGroup {
 
   Drive drive;
   double speed;
+  double seconds;
 
   public BasketballStrafeTime(Drive drive, double seconds, double speed) {
     this.drive = drive;
-    seconds = Math.clamp (seconds, 0, 3.75);
-    speed = Math.clamp(speed, -2, 2);
+    this.seconds = Math.clamp (seconds, 0, 3.75);
+    this.speed = Math.clamp(speed, -2, 2);
 
     super(new WaitCommand(seconds));
 
