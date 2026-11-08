@@ -21,7 +21,7 @@ public class BasketballDriveDistance extends ParallelDeadlineGroup {
 
   public BasketballDriveDistance(Drive drive, double meters, double speed) {
     this.drive = drive;
-    this.speed = Math.clamp(speed, -2, 2);
+    speed = Math.clamp(speed, -2, 2);
     super(new WaitCommand(Math.abs(meters/speed)));
 
     addCommands(DriveCommands.runVelocity(drive, speed*Math.copySign(1, meters), 0, 0 ));
