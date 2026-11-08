@@ -40,7 +40,7 @@ public class Shooter extends SubsystemBase {
   private StatusSignal<Voltage> appliedVoltsSignal;
   private StatusSignal<Current> statorCurrentSignal;
   private CANBus canBus;
-  private double targetRPM = 0.0;
+  private double targetRPM = kShootRPM;
 
   private final Alert duplicateIDAlert =
       new Alert("Shooter", "Shooter CAN IDs are not unique, followers disabled. Set IDs in Constants.", Level.HIGH);
@@ -115,7 +115,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void spinFlywheelAtRPM(double rpm){
-    System.out.println("Hello Shooter: rpm = " + rpm);
+    //System.out.println("Hello Shooter: rpm = " + rpm);
     shooterMotor1.setControl(shooterVelocityRequest.withVelocity(rpm / 60.0));
   }
 

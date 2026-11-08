@@ -24,6 +24,7 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
+import org.wpilib.system.Timer;
 
 
 import static first.robot.Constants.IntakeConstants.*;
@@ -55,6 +56,14 @@ public class Intake extends SubsystemBase
     private double pivotRequestedPower = 0.0;
     private double pivotSetpointDegrees = Double.NaN; // NaN when not under position control
 
+    private boolean isJostleEnabled;
+    private enum jostleStates {
+        STOWING,
+        DEPLOYING
+    }
+    private jostleStates currentJostleState;
+    private final Timer actionTimer;
+
     public Intake ()
     {
         IntakeRollerMotor1 = new TalonFX (kINTAKE_ROLLER_1_ID, kIntakeMotorCANBus);
@@ -84,6 +93,10 @@ public class Intake extends SubsystemBase
         BaseStatusSignal.setUpdateFrequencyForAll(50,
             rollerVelocitySignal, rollerAppliedVoltsSignal, rollerStatorCurrentSignal,
             pivotPositionSignal, pivotAppliedVoltsSignal, pivotStatorCurrentSignal);
+
+        isJostleEnabled = false;
+        actionTimer = new Timer();
+        currentJostleState = jostleStates.STOWING;
     }
 
     private void configureIntakeMotors()
@@ -121,7 +134,7 @@ public class Intake extends SubsystemBase
 
         tryUntilOk(5, () -> IntakeRollerMotor1.getConfigurator().apply(rollerConfig, 0.25));
         tryUntilOk(5, () -> IntakeRollerMotor2.getConfigurator().apply(rollerConfig, 0.25));
-        tryUntilOk(5, () -> IntakePivotMotor.getConfigurator().apply(pivotConfig, 0.25));
+        tryUntilOk(5, () -> IntakePivotMotor.getConfigurator().apply(pivotConfig, 0.5));
     }
 
     public void stopIntakeRollers ()
@@ -208,6 +221,19 @@ public class Intake extends SubsystemBase
         IntakePivotMotor.setControl(mpivotPositionRequest.withPosition(degreesToRotations(position)));
     }
 
+    //jostles intake to better grab balls and 
+    public void setJostleIntake(boolean jostleIntake) {
+        isJostleEnabled = jostleIntake;
+    }
+
+    public void restartTimer() {
+        actionTimer.restart();
+    }
+
+    public void stopTimer() {
+        actionTimer.stop();
+    }
+
     private static double degreesToRotations(double degrees)
     {
         return degrees / 360.0;
@@ -216,6 +242,17 @@ public class Intake extends SubsystemBase
     @Override
     public void periodic()
     {
+
+        if (isJostleEnabled && actionTimer.hasElapsed(1)) {
+            if (currentJostleState == jostleStates.DEPLOYING) {
+                setIntakePivotPower(kINTAKE_PIVOT_DEPLOY_POWER_JOSTLE);
+                currentJostleState = jostleStates.STOWING;
+            } else {
+                setIntakePivotPower(kINTAKE_PIVOT_STOW_POWER_JOSTLE);
+                currentJostleState = jostleStates.DEPLOYING;
+            }
+        }
+
         if (!isPivotSeeded)
         {
             seedPivotFromEncoder();

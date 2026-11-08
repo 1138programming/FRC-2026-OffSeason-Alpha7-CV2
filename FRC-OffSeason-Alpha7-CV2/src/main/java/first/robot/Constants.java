@@ -127,11 +127,13 @@ public final class Constants {
 
     public static final MotorAlignmentValue kINTAKE_ROLLER_2_ALIGNMENT = MotorAlignmentValue.Opposed;
 
-    public static final double kINTAKE_PIVOT_DEPLOY_POWER = 0.5;
-    public static final double kINTAKE_PIVOT_STOW_POWER = -0.5;
+    public static final double kINTAKE_PIVOT_DEPLOY_POWER = -0.2;
+    public static final double kINTAKE_PIVOT_DEPLOY_POWER_JOSTLE = -0.2;
+    public static final double kINTAKE_PIVOT_STOW_POWER = 0.2;
+    public static final double kINTAKE_PIVOT_STOW_POWER_JOSTLE = 0.2;
 
-    public static final double kINTAKE_ROLLER_IN_POWER = 0.5;
-    public static final double kINTAKE_ROLLER_OUT_POWER = -0.5;
+    public static final double kINTAKE_ROLLER_IN_POWER = -0.5;
+    public static final double kINTAKE_ROLLER_OUT_POWER = 0.5;
 
     public static final double kINTAKE_P = 0.8;
     public static final double kINTAKE_I = 0.0;
@@ -148,8 +150,11 @@ public final class Constants {
   public static class ActiveFloorConstants {
     public static final int kFLOOR_ROLLER_MOTOR_ID = 40;
 
-    public static final double kFLOOR_POWER_INWARD = 0.5;
-    public static final double kFLOOR_POWER_OUTWARD = -0.5;
+    public static final double kFLOOR_POWER_INWARD = -0.5;
+    public static final double kFLOOR_POWER_OUTWARD = 0.5;
+
+    public static final double kFLOOR_STATOR_CURRENT_LIMIT_AMPS = 120;
+    public static final double kFLOOR_SUPPLY_CURRENT_LIMIT_AMPS = 70;
   }
 
   public static class OperatorConstants {
@@ -175,9 +180,9 @@ public final class Constants {
   public static class LimelightConstants{
     public static final String klimelightName = "limelight";
 
-  public static final Pose3d kROBOT_TO_CAMERA = new Pose3d(0.0, 0.0, 0.0, new Rotation3d(0.0, 0.0, 0.0));
+  public static final Pose3d kROBOT_TO_CAMERA = new Pose3d(0.32585, -0, 0.3125978, new Rotation3d(0.0, 0.349066, 3.14159));
   public static final double kMAX_YAW_RATE_RAD_PER_SEC = Units.degreesToRadians(360);
-  public static final double kTHETA_STD_DEV_UNTRUSTED = 9999999; // gyro owns heading
+  public static final double kTHETA_STD_DEV_UNTRUSTED = 9999999; // gyro owns he00ading
   }
 
   /** REBUILT (2026) welded field, WPILib blue-origin meters. HUB centers derived from face tags. */
@@ -230,7 +235,8 @@ public final class Constants {
     public static final double kSupplyCurrentLimitAmps = 40;
 
     // Control setpoints
-    public static final double kShootRPM = 2000; // starting value for /Tuning/Shooter RPM, left trigger
+    public static final double kShootRPM = 2500; // starting value for /Tuning/Shooter RPM, left trigger
+    public static final double kReverseRPM = -500; // slowly bring back stuck balls in. low rpm as no excess power is needed
 
     // Robot-relative direction the shooter fires. ZERO = out the front, PI = out the back.
     public static final Rotation2d kShooterFacing = Rotation2d.ZERO;

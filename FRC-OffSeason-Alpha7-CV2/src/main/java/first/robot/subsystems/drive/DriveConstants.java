@@ -19,6 +19,8 @@ public class DriveConstants {
   public static final double driveBaseRadius = Math.hypot(trackWidthX / 2, trackWidthY / 2);
   public static final double maxLinearSpeed = 4.69;
   public static final double maxAngularSpeed = maxLinearSpeed / driveBaseRadius;
+  public static final double normalMultiplier = 0.75; //percentage of max speed for non boosted robot. Allows for greater control
+  public static final double boostMultiplier = 1.0;
   public static final double maxLinearAcceleration = 22.0;
 
   // Drive/turn gains for the real robot. Both motors are run with torque-current FOC, so all of

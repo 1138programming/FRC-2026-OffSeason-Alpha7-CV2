@@ -64,6 +64,8 @@ public class Drive extends SubsystemBase {
     modules[1] = new Module(frModuleIO, 1);
     modules[2] = new Module(blModuleIO, 2);
     modules[3] = new Module(brModuleIO, 3);
+
+    setPose(new Pose2d(getPose().getTranslation(), Rotation2d.ZERO));
   }
 
   @Override
@@ -115,8 +117,8 @@ public class Drive extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisVelocities speeds) {
-    System.out.println("Hello Run Velocity: " + speeds.toString());
-    System.out.println("Current Position: " + getPose());
+    //System.out.println("Hello Run Velocity: " + speeds.toString());
+    //System.out.println("Current Position: " + getPose());
     // Calculate module setpoints
     ChassisVelocities discreteSpeeds = speeds.discretize(Constants.kLOOPPERIODSECS);
     // desaturateWheelVelocities returns a new array rather than mutating in place, so its result
@@ -244,5 +246,9 @@ public class Drive extends SubsystemBase {
 
   public double getYawRateRadPerSec() {
     return gyroInputs.yawVelocityRadPerSec;
+  }
+
+  public Module[] getModuleArray() {
+    return modules;
   }
 }

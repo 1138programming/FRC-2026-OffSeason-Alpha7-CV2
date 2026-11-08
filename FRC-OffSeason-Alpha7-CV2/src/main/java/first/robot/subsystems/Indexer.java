@@ -52,10 +52,12 @@ public class Indexer extends SubsystemBase {
   }
 
   public void spinIndexerIn(){
+    requestedPower = kindexInPower;
     spinIndexerMotors(kindexInPower);
   }
 
   public void spinIndexerOut(){
+    requestedPower = kindexOutPower;
     spinIndexerMotors(kindexOutPower);
   }
 

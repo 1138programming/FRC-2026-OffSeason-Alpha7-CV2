@@ -8,13 +8,22 @@ import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Transform2d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.math.kinematics.SwerveModulePosition;
+import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.math.trajectory.TrapezoidProfile;
 import org.wpilib.math.util.Units;
 import org.wpilib.driverstation.Alliance;
+import org.wpilib.driverstation.Gamepad;
 import org.wpilib.driverstation.MatchState;
 import org.wpilib.system.Timer;
 import org.wpilib.command2.Command;
 import org.wpilib.command2.Commands;
+import org.wpilib.command2.button.CommandGamepad;
+import first.robot.subsystems.drive.Module;
+
+import static first.robot.Constants.OperatorConstants.kLOGITECH_BUTTON_LB;
+
+import java.lang.ModuleLayer.Controller;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -35,6 +44,8 @@ public class DriveCommands {
   private static final double FF_RAMP_RATE = 0.1; // Volts/Sec
   private static final double WHEEL_RADIUS_MAX_VELOCITY = 0.25; // Rad/Sec
   private static final double WHEEL_RADIUS_RAMP_RATE = 0.05; // Rad/Sec^2
+
+  private static final CommandGamepad controller = new CommandGamepad(0);
 
   private DriveCommands() {}
 
@@ -61,7 +72,7 @@ public class DriveCommands {
       DoubleSupplier ySupplier,
       DoubleSupplier omegaSupplier,
       BooleanSupplier fieldRelativeSupplier) {
-    System.out.println("Hello Drive Command: " + xSupplier.getAsDouble() + "," +  ySupplier.getAsDouble() + "," + omegaSupplier.getAsDouble());
+    //System.out.println("Hello Drive Command: " + xSupplier.getAsDouble() + "," +  ySupplier.getAsDouble() + "," + omegaSupplier.getAsDouble());
     return Commands.run(
         () -> {
           // Get linear velocity
@@ -74,16 +85,21 @@ public class DriveCommands {
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
 
+          boolean isBoosted = controller.button(kLOGITECH_BUTTON_LB).getAsBoolean();
+          double currentVelocityMultiplier = isBoosted ? DriveConstants.boostMultiplier : DriveConstants.normalMultiplier;
+
           // Scale the joystick inputs to chassis speeds
           ChassisVelocities speeds =
               new ChassisVelocities(
-                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                  omega * drive.getMaxAngularSpeedRadPerSec());
+                  linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * currentVelocityMultiplier,
+                  linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * currentVelocityMultiplier,
+                  omega * drive.getMaxAngularSpeedRadPerSec() * currentVelocityMultiplier);
+
+
           if (fieldRelativeSupplier.getAsBoolean()) {
             boolean isFlipped = MatchState.getAlliance().orElse(Alliance.BLUE) == Alliance.RED;
             speeds = speeds.toRobotRelative(
-                isFlipped
+                true//TEMPORARY FIX TEMPORARY FIX TEMPORARY FIX
                     ? drive.getRotation().plus(new Rotation2d(Math.PI))
                     : drive.getRotation());
           }
@@ -102,6 +118,7 @@ public class DriveCommands {
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       Supplier<Rotation2d> rotationSupplier) {
+
 
     // Create PID controller
     ProfiledPIDController angleController =
@@ -283,7 +300,29 @@ public class DriveCommands {
           drive.runVelocity(speeds);
         },
         drive);
-    }
+  }
+
+  // public static Command defenseMode(Drive drive) {
+  //   return Commands.run(
+  //     () -> {
+  //       SwerveModuleVelocity[] defenseModulePositions = new SwerveModuleVelocity[] {
+  //         new SwerveModuleVelocity(0.0, Rotation2d.fromDegrees(45)),
+  //         new SwerveModuleVelocity(0.0, Rotation2d.fromDegrees(-45)),
+  //         new SwerveModuleVelocity(0.0, Rotation2d.fromDegrees(-45)),
+  //         new SwerveModuleVelocity(0.0, Rotation2d.fromDegrees(45))
+  //       };
+
+  //       Module[] drivemodules = drive.getModuleArray();
+  //       for(int i = 0; i < 4; i++) {
+  //         drivemodules[i].runSetpoint(defenseModulePositions[i]);
+  //       }
+
+  //     }, 
+      
+  //     drive);
+  // }
+
+
 
   private static class WheelRadiusCharacterizationState {
     double[] positions = new double[4];

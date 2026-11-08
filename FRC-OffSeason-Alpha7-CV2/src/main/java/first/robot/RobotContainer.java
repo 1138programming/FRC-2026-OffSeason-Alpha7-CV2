@@ -31,10 +31,15 @@ import first.robot.commands.IntakeCommands.IntakePivotReverse;
 import first.robot.commands.IntakeCommands.IntakePivotStow;
 import first.robot.commands.IntakeCommands.IntakeRollerIn;
 import first.robot.commands.IntakeCommands.IntakeRollerOut;
+import first.robot.commands.IntakeCommands.JostleIntake;
 import first.robot.commands.SpinShooterAtRPMCommand;
 import first.robot.commands.IndexerCommands.IndexInCommand;
 import first.robot.commands.IndexerCommands.IndexOutCommand;
 import first.robot.commands.IndexerCommands.IndexUntilBallIn;
+import first.robot.commandGroups.throughputGroups.runFloorIndexerShooter;
+import first.robot.commandGroups.throughputGroups.runFloorIndexerShooterReverse;
+import first.robot.commandGroups.throughputGroups.runIndexerShooter;
+import first.robot.commandGroups.throughputGroups.runIndexerShooterReverse;
 import first.robot.subsystems.ActiveFloor;
 import first.robot.subsystems.CANRangeSensor;
 import first.robot.subsystems.Indexer;
@@ -89,6 +94,14 @@ public class RobotContainer {
   private final CommandGamepad controller = new CommandGamepad(0);
   private final CommandGamepad compStreamDeck = new CommandGamepad(1);
 
+  private final IntakePivotForward intakePivotForward;
+  private final IntakePivotReverse intakePivotReverse;
+  private final IntakePivotDeploy intakePivotDeploy;
+  private final IntakePivotStow intakePivotStow;
+  private final IntakeRollerIn intakeRollerIn;
+  private final IntakeRollerOut intakeRollerOut;
+  private final JostleIntake jostleIntake;
+
   private final IndexInCommand indexInCommand;
   private final IndexOutCommand indexOutCommand;
   private final IndexUntilBallIn indexUntilBallInCommand;
@@ -97,6 +110,14 @@ public class RobotContainer {
 
   private final FloorInward floorInward;
   private final FloorOutward floorOutward;
+
+  //command groups
+  private final runFloorIndexerShooter dump;
+  private final runFloorIndexerShooterReverse unDump;
+  private final runIndexerShooter shoot;
+  private final runIndexerShooterReverse unShoot;
+
+  private final first.robot.commands.manualAutons.manualBackupAndShootCommand manualBackupAndShootCommand;
 
   private boolean fieldRelative = true;
 
@@ -151,43 +172,58 @@ public class RobotContainer {
     intake = new Intake();
     activeFloor = new ActiveFloor();
 
+    intakePivotForward = new IntakePivotForward(intake);
+    intakePivotReverse = new IntakePivotReverse(intake);
+    intakePivotDeploy =  new IntakePivotDeploy(intake);
+    intakePivotStow = new IntakePivotStow(intake);
+    intakeRollerIn = new IntakeRollerIn(intake);
+    intakeRollerOut =  new IntakeRollerOut(intake);
+    jostleIntake = new JostleIntake(intake);
+
     indexerCANRange = new CANRangeSensor();
 
     indexInCommand = new IndexInCommand(indexer);
     indexOutCommand = new IndexOutCommand(indexer);
     indexUntilBallInCommand = new IndexUntilBallIn(indexerCANRange, indexer);
 
-    spinShooterAtRPMCommand = new SpinShooterAtRPMCommand(shooter, () -> 2000);
+    spinShooterAtRPMCommand = new SpinShooterAtRPMCommand(shooter, kShootRPM);
 
     floorInward = new FloorInward(activeFloor, kFLOOR_POWER_INWARD);
     floorOutward = new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD);
 
-
+    
+    //command groups
+    dump =  new runFloorIndexerShooter(activeFloor, indexer, shooter);
+    unDump = new runFloorIndexerShooterReverse(activeFloor, indexer, shooter);
+    shoot = new runIndexerShooter(indexer, shooter);
+    unShoot = new runIndexerShooterReverse(indexer, shooter);
+    
+    
     switch (Constants.getMode()) {
-      case REAL ->
-          // Real robot, instantiate hardware IO implementations
-          drive =
-              new Drive(
+        case REAL ->
+        // Real robot, instantiate hardware IO implementations
+        drive =
+        new Drive(
                   new GyroIOPigeon2(),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[0]),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[1]),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[2]),
                   new ModuleIOTalonFX(DriveConstants.moduleConfigs[3]));
-
-      case SIM ->
-          // Sim robot, instantiate physics sim IO implementations. There is no Pigeon sim, so the
-          // heading comes from the module kinematics instead.
+                  
+                  case SIM ->
+                  // Sim robot, instantiate physics sim IO implementations. There is no Pigeon sim, so the
+                  // heading comes from the module kinematics instead.
           drive =
-              new Drive(
+          new Drive(
                   new GyroIO() {},
                   new ModuleIOSim(),
                   new ModuleIOSim(),
                   new ModuleIOSim(),
                   new ModuleIOSim());
-
-      default ->
-          // Replayed robot, disable IO implementations
-          drive =
+                  
+                  default ->
+                  // Replayed robot, disable IO implementations
+                  drive =
               new Drive(
                   new GyroIO() {},
                   new ModuleIO() {},
@@ -196,20 +232,24 @@ public class RobotContainer {
                   new ModuleIO() {});
 
         
-    }
-
+                }
+                
     vision = switch (Constants.getMode()) {
         case REAL -> new Vision(new VisionIOLimelight(klimelightName, kROBOT_TO_CAMERA),
-            drive::addVisionMeasurement, drive::getRotation, drive::getYawRateRadPerSec);
+        drive::addVisionMeasurement, drive::getRotation, drive::getYawRateRadPerSec);
         default -> new Vision(new VisionIO() {},
-            drive::addVisionMeasurement, drive::getRotation, drive::getYawRateRadPerSec);
+        drive::addVisionMeasurement, drive::getRotation, drive::getYawRateRadPerSec);
     };
-
     
+    
+    manualBackupAndShootCommand = new first.robot.commands.manualAutons.manualBackupAndShootCommand(activeFloor, indexer, shooter, drive);
 
     // Set up auto routines
     autoChooser = new LoggedNetworkChooser<>("/SmartDashboard/Auto Choices");
     autoChooser.addDefault("None", Commands.none());
+    autoChooser.add("Backup and Shoot", manualBackupAndShootCommand);
+
+
 
     // Set up characterization routines
     autoChooser.add(
@@ -232,25 +272,25 @@ public class RobotContainer {
     logitechButtonDpadLeft = controller.button(kLOGITECH_BUTTON_DPAD_LEFT);
     logitechButtonDpadRight = controller.button(kLOGITECH_BUTTON_DPAD_RIGHT);
 
-    compStreamDeck1 = compStreamDeck.button(1);
-    compStreamDeck2 = compStreamDeck.button(2);
-    compStreamDeck3 = compStreamDeck.button(3);
-    compStreamDeck4 = compStreamDeck.button(4);
-    compStreamDeck5 = compStreamDeck.button(5);
-    compStreamDeck6 = compStreamDeck.button(6);
-    compStreamDeck7 = compStreamDeck.button(7);
-    compStreamDeck8 = compStreamDeck.button(8);
-    compStreamDeck9 = compStreamDeck.button(9);
-    compStreamDeck10 = compStreamDeck.button(10);
-    compStreamDeck11 = compStreamDeck.button(11);
-    compStreamDeck12 = compStreamDeck.button(12);
-    compStreamDeck13 = compStreamDeck.button(13);
-    compStreamDeck14 = compStreamDeck.button(14);
-    compStreamDeck15 = compStreamDeck.button(15);
-    compStreamDeck16 = compStreamDeck.button(16);
-    compStreamDeck17 = compStreamDeck.button(17);
-    compStreamDeck18 = compStreamDeck.button(18);
-    compStreamDeck19 = compStreamDeck.button(19);
+    compStreamDeck1 = compStreamDeck.button(0);
+    compStreamDeck2 = compStreamDeck.button(1);
+    compStreamDeck3 = compStreamDeck.button(2);
+    compStreamDeck4 = compStreamDeck.button(3);
+    compStreamDeck5 = compStreamDeck.button(4);
+    compStreamDeck6 = compStreamDeck.button(5);
+    compStreamDeck7 = compStreamDeck.button(6);
+    compStreamDeck8 = compStreamDeck.button(7);
+    compStreamDeck9 = compStreamDeck.button(8);
+    compStreamDeck10 = compStreamDeck.button(9);
+    compStreamDeck11 = compStreamDeck.button(10);
+    compStreamDeck12 = compStreamDeck.button(11);
+    compStreamDeck13 = compStreamDeck.button(12);
+    compStreamDeck14 = compStreamDeck.button(13);
+    compStreamDeck15 = compStreamDeck.button(14);
+    compStreamDeck16 = compStreamDeck.button(15);
+    compStreamDeck17 = compStreamDeck.button(16);
+    compStreamDeck18 = compStreamDeck.button(17);
+    compStreamDeck19 = compStreamDeck.button(18);
 
     // Configure the button bindings
     configureButtonBindings();
@@ -270,7 +310,7 @@ public class RobotContainer {
             () -> fieldRelative));
 
     // Toggle field/robot relative on right stick press without interrupting the drive command
-    controller.rightStick().onTrue(Commands.runOnce(() -> fieldRelative = !fieldRelative));
+    //controller.rightStick().onTrue(Commands.runOnce(() -> fieldRelative = !fieldRelative));
 
     // Lock to 0 degrees while A is held
     controller
@@ -283,17 +323,17 @@ public class RobotContainer {
                 () -> Rotation2d.ZERO));
 
     // Switch to X pattern when X is pressed
-    controller.faceLeft().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // controller.faceLeft().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset the heading to "facing away from our driver station" when 'Back' is pressed.
     // On red that is 180 degrees; vision and auto-aim need the true field heading.
-    controller.back()
-        .onTrue(
-            Commands.runOnce(
-                    () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(),
-                        isRed() ? Rotation2d.PI : Rotation2d.ZERO)),
-                    drive)
-                .ignoringDisable(true));
+    // controller.back()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(),
+    //                     isRed() ? Rotation2d.PI : Rotation2d.ZERO)),
+    //                 drive)
+    //             .ignoringDisable(true));
 
 
     //shooter buttons (hold to aim + spin + feed, release to stop)
@@ -310,29 +350,75 @@ public class RobotContainer {
     //             () -> shooter.spinFlywheelMotors(kTestDutyCycle), shooter::stopFlywheelMotors, shooter));
     
     //toggle field relative 
-    logitechButtonLB.onTrue(Commands.runOnce(() -> fieldRelative = !fieldRelative));
+    //logitechButtonStart.onTrue(Commands.runOnce(() -> fieldRelative = !fieldRelative));
+    
+    // ----------------- //
+    // -- Test Control --//
+    // ----------------- //
 
     //indexer buttons
-    logitechButtonY.whileTrue(indexInCommand);
-    logitechButtonA.whileTrue(indexOutCommand);
-    logitechButtonB.whileTrue(indexUntilBallInCommand);
+    // logitechButtonY.whileTrue(indexInCommand);
+    // logitechButtonA.whileTrue(indexOutCommand);
+    // logitechButtonB.whileTrue(indexUntilBallInCommand);
 
-    logitechButtonBack.whileTrue(spinShooterAtRPMCommand);
+    // logitechButtonBack.whileTrue(spinShooterAtRPMCommand);
 
-    logitechButtonLB.whileTrue(floorInward);
-    logitechButtonRB.whileTrue(floorOutward);
+    // logitechButtonLB.whileTrue(floorInward);
+    // logitechButtonRB.whileTrue(floorOutward);
 
 
 
-    //intake buttons
-    logitechButtonDpadUp.whileTrue(new IntakePivotForward(intake));
-    logitechButtonDpadDown.whileTrue(new IntakePivotReverse(intake));
-    logitechButtonDpadLeft.whileTrue(new IntakeRollerIn(intake));
-    logitechButtonDpadRight.whileTrue(new IntakeRollerOut(intake));
+    // //intake buttons
+    // logitechButtonDpadUp.whileTrue(new IntakePivotForward(intake));
+    // logitechButtonDpadDown.whileTrue(new IntakePivotReverse(intake));
+    // logitechButtonDpadLeft.whileTrue(new IntakeRollerIn(intake));
+    // logitechButtonDpadRight.whileTrue(new IntakeRollerOut(intake));
 
-    //floor buttons
+    // //floor buttons
     // logitechButtonStart.whileTrue(new FloorInward(activeFloor, kFLOOR_POWER_INWARD));
     // logitechButtonBack.whileTrue(new FloorOutward(activeFloor, kFLOOR_POWER_OUTWARD));
+    
+    // ------------------- //
+    // -- Drive Control -- //
+    // ------------------- //
+
+    //controller
+    logitechButtonY
+        .onTrue(
+            Commands.runOnce(
+                () -> 
+                    drive.setPose(
+                        new Pose2d(drive.getPose().getTranslation(), Rotation2d.ZERO)), 
+                    drive)
+                .ignoringDisable(true));
+
+    logitechButtonRT.whileTrue(intakePivotForward);
+    logitechButtonLT.whileTrue(intakePivotForward);
+    logitechButtonRB.whileTrue(intakeRollerIn);
+
+    //logitechButtonDpadUp.whileTrue(DriveCommands.defenseMode(drive));
+
+    // //streamdeck
+    compStreamDeck1.whileTrue(dump);
+    compStreamDeck2.whileTrue(unDump);
+    compStreamDeck6.whileTrue(shoot);
+    compStreamDeck7.whileTrue(unShoot);
+
+    compStreamDeck3.whileTrue(spinShooterAtRPMCommand);
+
+    compStreamDeck4.whileTrue(intakePivotReverse);
+    compStreamDeck5.whileTrue(intakePivotForward);
+    compStreamDeck9.whileTrue(intakeRollerOut);
+    compStreamDeck10.whileTrue(intakeRollerIn);
+    compStreamDeck14.whileTrue(jostleIntake);
+
+    compStreamDeck11.whileTrue(floorInward);
+    compStreamDeck12.whileTrue(floorOutward);
+
+    //logitechButtonDpadUp.whileTrue(DriveCommands.runVelocity(drive, 1, 0, 0));
+
+
+
     
   }
 
@@ -397,6 +483,28 @@ public class RobotContainer {
     return shotTarget().minus(drive.getPose().getTranslation()).getAngle()
         .map(angle -> angle.minus(kShooterFacing))
         .orElse(drive.getRotation());
+  }
+
+  //manual backup and shoot command
+  public Command manualBackupAndShootCommand() {
+    return Commands.sequence(
+        //early rev
+        Commands.race(
+            spinShooterAtRPMCommand,
+            Commands.waitSeconds(1)
+        ),
+
+        //rev and backup
+        Commands.race(
+            spinShooterAtRPMCommand,
+            DriveCommands.runVelocity(drive, 1.706, 0, 0).withTimeout(1.5)
+        ),
+
+        //dump it all -> check if automatically stops
+        Commands.race(
+            dump.withTimeout(6)
+        )   
+    );
   }
 
   /**

@@ -19,6 +19,7 @@ import static first.robot.Constants.ActiveFloorConstants.*;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -57,6 +58,12 @@ public class ActiveFloor extends SubsystemBase {
         new MotorOutputConfigs()
         .withInverted(InvertedValue.Clockwise_Positive)
         .withNeutralMode(NeutralModeValue.Brake)
+      ).withCurrentLimits(
+        new CurrentLimitsConfigs()
+        .withStatorCurrentLimit(kFLOOR_STATOR_CURRENT_LIMIT_AMPS)
+        .withStatorCurrentLimitEnable(true)
+        .withSupplyCurrentLimit(kFLOOR_SUPPLY_CURRENT_LIMIT_AMPS)
+        .withStatorCurrentLimitEnable(true)
       );
 
       floorRollerMotor.getConfigurator().apply(config);
